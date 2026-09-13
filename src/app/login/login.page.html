@@ -1,0 +1,54 @@
+<ion-content [fullscreen]="true" class="login-content">
+  <div class="main">
+    <div class="container a-container" [class.is-txl]="toggled">
+      <form id="a-form" class="form" method="" action="" (submit)="onSignUp($event)">
+        <h2 class="form_title title">Create Account</h2>
+        <div class="form__icons">
+          <img class="form__icon" src="assets/icons/facebook.svg" alt="Facebook" />
+          <img class="form__icon" src="assets/icons/linkedin.svg" alt="LinkedIn" />
+          <img class="form__icon" src="assets/icons/twitter.svg" alt="Twitter" />
+        </div>
+        <span class="form__span">or use email for registration</span>
+        <input class="form__input" type="text" placeholder="Name" name="signUpName" [(ngModel)]="signUpName" required />
+        <input class="form__input" type="email" placeholder="Email" name="signUpEmail" [(ngModel)]="signUpEmail" required />
+        <input class="form__input" type="password" placeholder="Password" name="signUpPassword" [(ngModel)]="signUpPassword" required />
+        <span class="form__error" *ngIf="errorMessage && !toggled">{{ errorMessage }}</span>
+        <button type="submit" class="form__button button submit" [disabled]="loading">SIGN UP</button>
+      </form>
+    </div>
+
+    <div class="container b-container" [class.is-txl]="toggled" [class.is-z200]="toggled">
+      <form id="b-form" class="form" method="" action="" (submit)="onSignIn($event)">
+        <h2 class="form_title title">Sign in to Website</h2>
+        <div class="form__icons">
+          <img class="form__icon" src="assets/icons/facebook.svg" alt="Facebook" />
+          <img class="form__icon" src="assets/icons/linkedin.svg" alt="LinkedIn" />
+          <img class="form__icon" src="assets/icons/twitter.svg" alt="Twitter" />
+        </div>
+        <span class="form__span">or use your email account</span>
+        <input class="form__input" type="email" placeholder="Email" name="signInEmail" [(ngModel)]="signInEmail" required />
+        <input class="form__input" type="password" placeholder="Password" name="signInPassword" [(ngModel)]="signInPassword" required />
+        <a class="form__link">Forgot your password?</a>
+        <span class="form__error" *ngIf="errorMessage && toggled">{{ errorMessage }}</span>
+        <button type="submit" class="form__button button submit" [disabled]="loading">SIGN IN</button>
+      </form>
+    </div>
+
+    <div class="switch" [class.is-txr]="toggled" [class.is-gx]="animating">
+      <div class="switch__circle" [class.is-txr]="toggled"></div>
+      <div class="switch__circle switch__circle--t" [class.is-txr]="toggled"></div>
+
+      <div class="switch__container" [class.is-hidden]="toggled">
+        <h2 class="switch__title title">Welcome Back !</h2>
+        <p class="switch__description description">To keep connected with us please login with your personal info</p>
+        <button type="button" class="switch__button button switch-btn" (click)="changeForm()">SIGN IN</button>
+      </div>
+
+      <div class="switch__container" [class.is-hidden]="!toggled">
+        <h2 class="switch__title title">Hello Friend !</h2>
+        <p class="switch__description description">Enter your personal details and start journey with us</p>
+        <button type="button" class="switch__button button switch-btn" (click)="changeForm()">SIGN UP</button>
+      </div>
+    </div>
+  </div>
+</ion-content>
