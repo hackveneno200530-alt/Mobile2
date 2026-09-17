@@ -7,7 +7,8 @@
  * {
  *   "success": boolean,
  *   "message": string,
- *   "user": { "id": number, "name": string, "email": string, "created_at": string } | null
+ *   "user": { "id": number, "first_name": string, "last_name": string,
+ *              "email": string, "created_at": string } | null
  * }
  */
 
@@ -27,17 +28,25 @@ if ($email === '' || $password === '') {
 
 try {
     $pdo = getConnection();
-    $stmt = $pdo->prepare('SELECT id, name, email, password, created_at FROM users WHERE email = :email LIMIT 1');
+    $stmt = $pdo->prepare(
+        'SELECT id, first_name, last_name, email, password_hash, status, created_at
+         FROM users WHERE email = :email LIMIT 1'
+    );
     $stmt->execute(['email' => $email]);
     $row = $stmt->fetch();
 
-    if (!$row || !password_verify($password, $row['password'])) {
+    if (!$row || !password_verify($password, $row['password_hash'])) {
         respond(false, 'Credenciales invalidas.', null, 401);
+    }
+
+    if ($row['status'] !== 'active') {
+        respond(false, 'Esta cuenta esta deshabilitada.', null, 403);
     }
 
     respond(true, 'Login exitoso.', [
         'id' => (int) $row['id'],
-        'name' => $row['name'],
+        'first_name' => $row['first_name'],
+        'last_name' => $row['last_name'],
         'email' => $row['email'],
         'created_at' => $row['created_at'],
     ]);

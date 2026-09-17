@@ -2,6 +2,8 @@
 /**
  * POST /api/register.php
  * Body: { "name": string, "email": string, "password": string }
+ * ("name" se divide en first_name/last_name: la primera palabra es el
+ *  nombre, el resto el apellido; si no hay espacio, last_name queda '').
  *
  * Respuesta: mismo objeto que login.php -> { success, message, user }
  */
@@ -29,6 +31,10 @@ if (strlen($password) < 6) {
     respond(false, 'El password debe tener al menos 6 caracteres.', null, 422);
 }
 
+$parts = preg_split('/\s+/', $name, 2);
+$firstName = $parts[0];
+$lastName = $parts[1] ?? '';
+
 try {
     $pdo = getConnection();
 
@@ -40,21 +46,26 @@ try {
 
     $hash = password_hash($password, PASSWORD_DEFAULT);
 
-    $insert = $pdo->prepare('INSERT INTO users (name, email, password) VALUES (:name, :email, :password)');
+    $insert = $pdo->prepare(
+        'INSERT INTO users (first_name, last_name, email, password_hash)
+         VALUES (:first_name, :last_name, :email, :password_hash)'
+    );
     $insert->execute([
-        'name' => $name,
+        'first_name' => $firstName,
+        'last_name' => $lastName,
         'email' => $email,
-        'password' => $hash,
+        'password_hash' => $hash,
     ]);
 
     $userId = (int) $pdo->lastInsertId();
-    $created = $pdo->prepare('SELECT id, name, email, created_at FROM users WHERE id = :id');
+    $created = $pdo->prepare('SELECT id, first_name, last_name, email, created_at FROM users WHERE id = :id');
     $created->execute(['id' => $userId]);
     $row = $created->fetch();
 
     respond(true, 'Cuenta creada correctamente.', [
         'id' => (int) $row['id'],
-        'name' => $row['name'],
+        'first_name' => $row['first_name'],
+        'last_name' => $row['last_name'],
         'email' => $row['email'],
         'created_at' => $row['created_at'],
     ], 201);
