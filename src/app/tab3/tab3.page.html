@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Tab 3
+      Carrito
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -9,9 +9,40 @@
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Tab 3</ion-title>
+      <ion-title size="large">Carrito</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
+  @if (cart.items().length === 0) {
+    <p class="empty-cart">Tu carrito esta vacio.</p>
+  } @else {
+    <ion-list>
+      @for (item of cart.items(); track item.productId) {
+        <ion-item>
+          <ion-label>
+            <h2>{{ item.name }}</h2>
+            <p>${{ item.price }} c/u</p>
+          </ion-label>
+
+          <ion-button slot="end" fill="clear" (click)="decrement(item.productId, item.quantity)">
+            <ion-icon slot="icon-only" name="remove-circle-outline"></ion-icon>
+          </ion-button>
+
+          <ion-note slot="end">{{ item.quantity }}</ion-note>
+
+          <ion-button slot="end" fill="clear" (click)="increment(item.productId, item.quantity)">
+            <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+          </ion-button>
+
+          <ion-button slot="end" fill="clear" color="danger" (click)="remove(item.productId)">
+            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+          </ion-button>
+        </ion-item>
+      }
+    </ion-list>
+
+    <div class="cart-total">
+      <strong>Total: ${{ total() }}</strong>
+    </div>
+  }
 </ion-content>
