@@ -2,47 +2,63 @@
 **Ingeniería en Software — 9° Cuatrimestre**  
 **Materia:** Programación Móvil II (9B)  
 **Actividad:** Elemento Multimedia o Interacción Gráfica  
-**Proyecto:** E-Commerce Del Río Caps (Capacitor 8 + Ionic 9 + Angular 22 + Android)  
-**Repositorio GitHub:** [https://github.com/hackveneno200530-alt/Mobile2.git](https://github.com/hackveneno200530-alt/Mobile2.git)
+**Proyecto:** E-Commerce Del Río Caps (Capacitor 8 + Ionic 9 + Angular 22 + PHP + MySQL)  
+**Repositorio GitHub:** [https://github.com/hackveneno200530-alt/Mobile2.git](https://github.com/hackveneno200530-alt/Mobile2.git)  
+**Enlace al Video Corto:** [PEGA_AQUÍ_EL_ENLACE_DE_TU_VIDEO_DRIVE_O_YOUTUBE]  
 
 ---
 
 ## 1. Introducción y Justificación del Elemento Multimedia
 
-En el contexto de la aplicación móvil de **Del Río Caps** (tienda especializada en streetwear, gorras New Era, calzado urbano y perfumería de diseñador), la interacción visual y el contenido multimedia representan un componente esencial para la conversión de clientes y la fidelización de la comunidad.
+En la aplicación móvil de **Del Río Caps** (tienda especializada en streetwear, gorras New Era, calzado urbano y fragancias de diseñador), la interacción visual y multimedia es fundamental para mejorar la conversión y fidelizar al cliente.
 
-Para dar cumplimiento a la actividad, se desarrolló una solución integral que combina **acceso a hardware nativo**, **persistencia en el sistema de archivos del dispositivo**, **componentes visuales interactivos** y **micro-animaciones fluidas**:
+Para dar cumplimiento a los criterios de la actividad, se desarrolló el módulo **"Comunidad Del Río / Galería de Outfits"** (`Tab 4`), el cual integra:
 
-1. **Acceso al Hardware de la Cámara y Galería:** Integración de `@capacitor/camera` para captura fotográfica directa y selección de imágenes desde la memoria del dispositivo con diálogos nativos (`ActionSheet`).
-2. **Persistencia Híbrida en Disco:** Almacenamiento seguro de las capturas en el almacenamiento físico del teléfono (`@capacitor/filesystem` en `Directory.Data`) y sincronización de metadatos (likes, categorías, títulos, fechas) mediante `@capacitor/preferences`.
-3. **Galería Responsiva de Outfits:** Grilla dinámica optimizada para dispositivos móviles con diseño en dos columnas, insignias de categoría y fechas de publicación.
-4. **Filtros Gráficos Reactivos en Tiempo Real:** Barra de chips interactivos (`Todos`, `Gorras`, `Sneakers`, `Perfumería`) gestionada mediante **Angular Signals** (`computed`), permitiendo una segmentación visual instantánea con cero latencia.
-5. **Micro-interacciones y Animaciones CSS:** Efecto táctil con contador de "Likes" impulsado por una animación de pulso cardíaco (`@keyframes heartBeat`), además de elevación y desenfoque dinámico (`glassmorphism`).
-6. **Modal Interactivo a Pantalla Completa:** Visualizador inmersivo de alta resolución con vista ampliada, detalles del autor y opción de eliminación protegida por confirmación nativa.
+1. **Acceso al Hardware de la Cámara y Galería:** Integración de `@capacitor/camera` para captura directa con el sensor del dispositivo (`CameraSource.Camera`) y selección desde la galería física (`CameraSource.Photos`) a través de un `ActionSheet` nativo.
+2. **Persistencia Híbrida en Almacenamiento Local:** Almacenamiento físico de los archivos de imagen en el directorio interno de la app con `@capacitor/filesystem` (`Directory.Data`) y guardado reactivo de metadatos (likes, categorías, títulos y fechas) mediante `@capacitor/preferences`.
+3. **Galería Responsiva de Outfits:** Cuadrícula adaptativa en dos columnas optimizada para teléfonos móviles con tarjetas estilizadas, insignias de categoría e información temporal.
+4. **Filtros Gráficos Reactivos en Tiempo Real:** Barra superior de chips interactivos (`Todos`, `Gorras`, `Sneakers`, `Perfumería`) impulsada por **Angular Signals** (`computed`), logrando un filtrado instantáneo sin latencia.
+5. **Micro-interacciones y Animaciones CSS:** Botón interactivo de "Like" con animación de latido de corazón (`@keyframes heartBeat`) y conteo dinámico en tiempo real.
+6. **Modal Interactivo a Pantalla Completa:** Visualizador inmersivo de alta resolución con vista ampliada, detalles de publicación y opción de eliminación con diálogo de confirmación.
 
 ---
 
-## 2. Arquitectura de la Solución
+## 2. Enlace y Evidencia del Video Demostrativo (Video Corto)
 
-El módulo multimedia se organiza bajo una arquitectura modular y desacoplada siguiendo las mejores prácticas de **Angular 22 Standalone** e **Ionic 9**:
+* **URL del Video:** `[PEGA_AQUÍ_EL_ENLACE_DE_TU_VIDEO_DRIVE_O_YOUTUBE]`
+* **Duración:** 1 a 2 minutos
+* **Dispositivo de Prueba:** Google Pixel (Android) / Navegador Web en modo móvil
+
+### Guion y Estructura Demostrada en el Video:
+
+| Tiempo | Sección Demostrada | Explicación del Alumno |
+| :--- | :--- | :--- |
+| **0:00 - 0:25** | Pestaña de Fotos / Outfits | *"Buenas tardes profesor. Para esta práctica de elementos multimedia e interacciones gráficas, implementamos en la app Del Río Caps la galería comunitaria de outfits para nuestros clientes."* |
+| **0:25 - 0:50** | Botón Flotante y Cámara Nativa | *"Utilizamos el plugin oficial de Capacitor Camera. Al tocar el botón flotante se despliega el menú nativo para tomar fotografía con el hardware de la cámara o seleccionar de galería. La imagen se guarda físicamente en el almacenamiento del dispositivo mediante Capacitor Filesystem."* |
+| **0:50 - 1:15** | Modal Interactivo a Pantalla Completa | *"Al interactuar con cualquier fotografía, se abre un modal inmersivo a pantalla completa con vista en alta definición, badges de categoría y control de eliminación con confirmación."* |
+| **1:15 - 1:35** | Filtros Reactivos y Micro-animación | *"Implementamos filtrado reactivo instantáneo mediante Angular Signals en la barra superior de chips, y una micro-animación de latido con conteo dinámico al pulsar Me Gusta."* |
+
+---
+
+## 3. Arquitectura del Módulo Multimedia
+
+La arquitectura de la solución se estructura siguiendo los estándares de **Angular 22 Standalone** y componentes nativos de **Ionic 9**:
 
 ```
 src/app/
 ├── services/
 │   └── photo.service.ts          # Gestión de Cámara, Filesystem y Preferences con Signals
-├── tab2/                         # Vista "Comunidad Del Río" (Fotos y Outfits)
-│   ├── tab2.page.ts              # Controlador: filtros reactivos, modal y ActionSheet
-│   ├── tab2.page.html            # Maquetación responsiva con CSS Grid y componentes Ionic
-│   └── tab2.page.scss            # Estilos personalizados, glassmorphism y micro-animaciones
+└── tab2/                         # Vista de Outfits ("Comunidad Del Río")
+    ├── tab2.page.ts              # Controlador: filtros reactivos, modal y ActionSheet
+    ├── tab2.page.html            # Maquetación responsiva (ion-grid, chips, FAB y modal)
+    └── tab2.page.scss            # Estilos personalizados y micro-animación heartBeat
 ```
 
 ---
 
-## 3. Código Fuente del Módulo Multimedia
+## 4. Código Fuente del Módulo Multimedia
 
-### 3.1. Servicio de Cámara y Almacenamiento (`PhotoService`)
-
-El servicio encapsula la lógica para interactuar con la cámara del dispositivo, codificar imágenes en Base64, almacenarlas en el sistema de archivos local y persistir la colección mediante preferencias del dispositivo.
+### 4.1. Servicio de Cámara y Almacenamiento Local (`photo.service.ts`)
 
 ```typescript
 import { Injectable, signal } from '@angular/core';
@@ -150,9 +166,7 @@ export class PhotoService {
 
 ---
 
-### 3.2. Controlador de la Vista (`Tab2Page`)
-
-Gestiona el filtrado reactivo de categorías mediante `computed()`, la apertura del modal a pantalla completa y el menú de selección de origen fotográfico (`ActionSheetController`).
+### 4.2. Controlador de la Vista con Signals (`tab2.page.ts`)
 
 ```typescript
 import { Component, inject, signal, computed } from '@angular/core';
@@ -186,7 +200,7 @@ export class Tab2Page {
   public selectedCategory = signal<string>('todos');
   public previewPhoto = signal<UserPhoto | null>(null);
 
-  // Filtro reactivo en tiempo real con Signals
+  // Filtro computado reactivo con Signals
   public filteredPhotos = computed(() => {
     const cat = this.selectedCategory();
     const all = this.photoService.photos();
@@ -237,9 +251,7 @@ export class Tab2Page {
 
 ---
 
-### 3.3. Interfaz Visual e Interactiva (`tab2.page.html`)
-
-Estructura de la galería con barra horizontal de categorías, micro-tarjetas interactivas con `ion-chip`, badge de "Like" superpuesto y modal inmersivo con zoom fotográfico.
+### 4.3. Plantilla Visual e Interactiva (`tab2.page.html`)
 
 ```html
 <ion-header class="ion-no-border brand-header">
@@ -252,7 +264,7 @@ Estructura de la galería con barra horizontal de categorías, micro-tarjetas in
     </ion-title>
   </ion-toolbar>
 
-  <!-- Barra de Filtros Gráficos Interactivos -->
+  <!-- Filtros Gráficos Interactivos con Chips -->
   <div class="category-chips-bar">
     <ion-chip [class.active-chip]="selectedCategory() === 'todos'" (click)="selectCategory('todos')">
       <ion-label>Todos</ion-label>
@@ -275,7 +287,7 @@ Estructura de la galería con barra horizontal de categorías, micro-tarjetas in
     <p>Captura con tu cámara y comparte tu combinación de gorras New Era, calzado y fragancias.</p>
   </div>
 
-  <!-- Grilla Responsiva de Fotos y Outfits -->
+  <!-- Grilla Responsiva de Fotos -->
   <ion-grid>
     <ion-row>
       @for (photo of filteredPhotos(); track photo.filepath) {
@@ -299,7 +311,7 @@ Estructura de la galería con barra horizontal de categorías, micro-tarjetas in
     </ion-row>
   </ion-grid>
 
-  <!-- Botón Flotante (FAB) para Captura Fotográfica -->
+  <!-- Botón Flotante (FAB) de Cámara -->
   <ion-fab slot="fixed" vertical="bottom" horizontal="end">
     <ion-fab-button (click)="openCameraPrompt()" class="camera-fab" aria-label="Tomar Fotografía">
       <ion-icon name="camera"></ion-icon>
@@ -344,10 +356,10 @@ Estructura de la galería con barra horizontal de categorías, micro-tarjetas in
 
 ---
 
-### 3.4. Estilos y Micro-animaciones CSS (`tab2.page.scss`)
+### 4.4. Micro-animaciones CSS (`tab2.page.scss`)
 
 ```scss
-// Micro-animación de pulso de corazón para interacción visual
+// Micro-animación de pulso de corazón para retroalimentación táctil
 @keyframes heartBeat {
   0% { transform: scale(1); }
   25% { transform: scale(1.3); }
@@ -370,7 +382,6 @@ Estructura de la galería con barra horizontal de categorías, micro-tarjetas in
     position: relative;
     width: 100%;
     aspect-ratio: 4 / 5;
-    background: #f1f5f9;
 
     img {
       width: 100%;
@@ -406,72 +417,20 @@ Estructura de la galería con barra horizontal de categorías, micro-tarjetas in
 
 ---
 
-## 4. Evidencias en Dispositivo / Emulador (Google Pixel 10 Pro)
+## 5. Código Subido a Git
 
-A continuación se presentan las capturas de pantalla obtenidas en el emulador oficial de Android ejecutando la aplicación móvil compilada de **Del Río Caps**:
+El código fuente completo del proyecto se encuentra versionado y publicado en GitHub bajo la rama principal:
 
-### 4.1. Galería Interactiva de Outfits (Comunidad Del Río)
-Pantalla principal del módulo multimedia en la pestaña de Fotos (`Tab 4`). Se aprecian las tarjetas con bordes redondeados, títulos dinámicos, contador de likes interactivo, insignias temáticas de streetwear y el Botón de Acción Flotante (FAB) de cámara.
-
-Insertar cap 1 aquí
-
----
-
-### 4.2. Action Sheet Nativo de Selección de Origen Fotográfico
-Al pulsar el botón flotante de la cámara, la aplicación despliega el diálogo nativo de Capacitor para que el usuario elija entre capturar una fotografía en vivo utilizando el sensor óptico del dispositivo o seleccionar un archivo existente desde la galería.
-
-Insertar cap 2 aquí
-
----
-
-### 4.3. Captura en Vivo con la Cámara Nativa de Android
-Integración del visor de la cámara nativa en el emulador de Android. El usuario realiza la toma en tiempo real y confirma la captura presionando el botón de verificación (✓) para que el archivo sea procesado y guardado físicamente en disco mediante `@capacitor/filesystem`.
-
-Insertar cap 3 aquí
-
----
-
-### 4.4. Modal Interactivo a Pantalla Completa con Zoom
-Componente visual inmersivo que se abre al tocar cualquier fotografía de la galería. Muestra la imagen en resolución completa sin distorsión de aspecto, la categoría detallada, la fecha de publicación y la opción de eliminación con confirmación de seguridad.
-
-Insertar cap 4 aquí
-
----
-
-### 4.5. Filtrado Gráfico Reactivo por Categoría (Sneakers)
-Segmentación instantánea del catálogo fotográfico mediante los chips interactivos superiores. Al presionar el chip "Sneakers", la galería actualiza su estado en milisegundos mediante Angular Signals y permite interactuar con el botón de "Me Gusta".
-
-Insertar cap 5 aquí
-
----
-
-## 5. Guion para el Video Corto Demostrativo (1 a 2 Minutos)
-
-Para la entrega del video corto requerido por el profesor, se diseñó la siguiente guía paso a paso:
-
-| Tiempo | Pantalla / Sección | Acción a Realizar | Narración Sugerida |
-| :--- | :--- | :--- | :--- |
-| **0:00 - 0:20** | Tab 4: Fotos | Iniciar en la pestaña "Fotos / Comunidad Del Río". Mostrar el scroll de la grilla de outfits. | *"Buenas tardes profesor. Para esta práctica de elementos multimedia e interacciones gráficas, implementamos en la app Del Río Caps la galería comunitaria de outfits para nuestros clientes."* |
-| **0:20 - 0:45** | Botón FAB y Cámara | Tocar el botón flotante azul de la cámara. Se abre el Action Sheet nativo. Seleccionar 'Tomar Foto'. Capturar la imagen en la cámara nativa y aceptar con el checkmark. | *"Utilizamos el plugin oficial de Capacitor Camera. Al tocar el botón flotante se despliega el menú nativo para tomar fotografía con el hardware de la cámara o seleccionar de galería. Tomamos la captura, la cual se procesa y guarda físicamente en el almacenamiento del dispositivo con Capacitor Filesystem."* |
-| **0:45 - 1:10** | Modal Interactivo | Tocar una tarjeta de fotografía para abrir el modal a pantalla completa. Cerrarlo con la 'X'. | *"Al interactuar con cualquier fotografía, se abre un modal inmersivo a pantalla completa con vista en alta definición, badges de categoría y control de eliminación con confirmación."* |
-| **1:10 - 1:30** | Filtros y Micro-animación | Presionar los chips de filtro ('Sneakers', 'Gorras', 'Todos') y pulsar el corazón de Like. | *"Implementamos filtrado reactivo instantáneo mediante Angular Signals en la barra superior de chips, y una micro-animación de latido con conteo dinámico al pulsar Me Gusta. Con esto la app ofrece una experiencia nativa y fluida."* |
-
----
-
-## 6. Código Subido a Git
-
-El código fuente de esta práctica ha sido subido y sincronizado con el repositorio oficial en GitHub:
-
-- **URL del Repositorio:** `https://github.com/hackveneno200530-alt/Mobile2.git`
-- **Rama:** `main`
-- **Mensaje de Commit:**
+* **URL del Repositorio:** [https://github.com/hackveneno200530-alt/Mobile2.git](https://github.com/hackveneno200530-alt/Mobile2.git)
+* **Rama:** `main`
+* **Mensaje de Commit:**
   ```text
   feat(multimedia): implementacion de galeria de fotos con capacitor camera, filesystem, modal interactivo y micro-animaciones
   ```
 
 ---
 
-## 7. Registro del Proceso Seguido con IA (Prompts Utilizados)
+## 6. Registro del Proceso Seguido con IA (Prompts Utilizados)
 
 Conforme a las directrices de la rúbrica docente, se documentan los **tres prompts estructurados** utilizados con el asistente de Inteligencia Artificial para el desarrollo de esta tarea:
 
