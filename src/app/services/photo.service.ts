@@ -6,64 +6,97 @@ import { Preferences } from '@capacitor/preferences';
 import { Platform } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
 
+export interface UserPhoto {
+  filepath: string;
+  webviewPath?: string;
+  title?: string;
+  categoryTag?: string;
+  likes?: number;
+  liked?: boolean;
+  date?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class PhotoService {
   public photos = signal<UserPhoto[]>([]);
-
-  private PHOTO_STORAGE: string = 'photos';
-
+  private PHOTO_STORAGE: string = 'delrio_community_photos_v2';
   private platform = inject(Platform);
 
-  /* Use the device camera to take a photo:
-  // https://capacitor.ionicframework.com/docs/apis/camera
+  // Fotografías de muestra iniciales para la comunidad Del Río
+  private defaultCommunityPhotos: UserPhoto[] = [
+    {
+      filepath: 'sample_streetwear_1',
+      webviewPath: 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=800',
+      title: 'Outfit Urbano con Snapback Del Río',
+      categoryTag: 'Gorras & Streetwear',
+      likes: 24,
+      liked: false,
+      date: 'Hoy, 18:30',
+    },
+    {
+      filepath: 'sample_streetwear_2',
+      webviewPath: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800',
+      title: 'Nike Air Force 1 recién llegados',
+      categoryTag: 'Sneakers',
+      likes: 41,
+      liked: true,
+      date: 'Ayer, 14:15',
+    },
+    {
+      filepath: 'sample_streetwear_3',
+      webviewPath: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=800',
+      title: 'Fragancia del Día: Sauvage Elixir',
+      categoryTag: 'Perfumería',
+      likes: 18,
+      liked: false,
+      date: '23 Octubre',
+    },
+  ];
 
-  // Store the photo data into permanent file storage:
-  // https://capacitor.ionicframework.com/docs/apis/filesystem
+  public async addNewToGallery(source: CameraSource = CameraSource.Prompt) {
+    try {
+      const capturedPhoto = await Camera.getPhoto({
+        resultType: CameraResultType.Uri,
+        source: source,
+        quality: 90,
+        allowEditing: false,
+      });
 
-  // Store a reference to all photo filepaths using Storage API:
-  // https://capacitor.ionicframework.com/docs/apis/storage
-  */
-  public async addNewToGallery() {
-    // Take a photo
-    const capturedPhoto = await Camera.getPhoto({
-      resultType: CameraResultType.Uri, // file-based data; provides best performance
-      source: CameraSource.Camera, // automatically take a new photo with the camera
-      quality: 100, // highest quality (0 to 100)
-    });
+      const savedImageFile = await this.savePicture(capturedPhoto);
+      savedImageFile.title = 'Mi Outfit Del Río Caps';
+      savedImageFile.categoryTag = 'Comunidad Del Río';
+      savedImageFile.likes = 1;
+      savedImageFile.liked = true;
+      savedImageFile.date = 'Justo ahora';
 
-    const savedImageFile = await this.savePicture(capturedPhoto);
+      this.photos.update((photos) => [savedImageFile, ...photos]);
 
-    // Add new photo to the front of the Photos signal
-    this.photos.update((photos) => [savedImageFile, ...photos]);
-
-    // Cache all photo data for future retrieval
-    Preferences.set({
-      key: this.PHOTO_STORAGE,
-      value: JSON.stringify(this.photos()),
-    });
+      await Preferences.set({
+        key: this.PHOTO_STORAGE,
+        value: JSON.stringify(this.photos()),
+      });
+      return true;
+    } catch (error) {
+      console.warn('[Camera] Cancelado o sin permiso:', error);
+      return false;
+    }
   }
 
-  // Save picture to file on device
-  private async savePicture(photo: Photo) {
-    // Convert photo to base64 format, required by Filesystem API to save
+  private async savePicture(photo: Photo): Promise<UserPhoto> {
     let base64Data: string | Blob;
 
-    // "hybrid" will detect Cordova or Capacitor
     if (this.platform.is('hybrid')) {
-      // Read the file into base64 format
       const file = await Filesystem.readFile({
         path: photo.path!,
       });
-
       base64Data = file.data;
     } else {
       base64Data = await this.base64FromPath(photo.webPath!);
     }
 
-    // Write the file to the data directory
-    const fileName = Date.now() + '.jpeg';
+    const fileName = 'delrio_' + Date.now() + '.jpeg';
     const savedFile = await Filesystem.writeFile({
       path: fileName,
       data: base64Data,
@@ -71,15 +104,11 @@ export class PhotoService {
     });
 
     if (this.platform.is('hybrid')) {
-      // Display the new image by rewriting the 'file://' path to HTTP
-      // Details: https://ionicframework.com/docs/building/webview#file-protocol
       return {
         filepath: savedFile.uri,
         webviewPath: Capacitor.convertFileSrc(savedFile.uri),
       };
     } else {
-      // Use webPath to display the new image instead of base64 since it's
-      // already loaded into memory
       return {
         filepath: fileName,
         webviewPath: photo.webPath,
@@ -105,50 +134,72 @@ export class PhotoService {
   }
 
   public async loadSaved() {
-    // Retrieve cached photo array data
     const { value: photoList } = await Preferences.get({ key: this.PHOTO_STORAGE });
-    const photos = (photoList ? JSON.parse(photoList) : []) as UserPhoto[];
+    let savedPhotos = (photoList ? JSON.parse(photoList) : []) as UserPhoto[];
 
-    // If running on the web...
+    if (savedPhotos.length === 0) {
+      savedPhotos = [...this.defaultCommunityPhotos];
+      await Preferences.set({
+        key: this.PHOTO_STORAGE,
+        value: JSON.stringify(savedPhotos),
+      });
+    }
+
     if (!this.platform.is('hybrid')) {
-      // Display the photo by reading into base64 format
-      for (const photo of photos) {
-        // Read each saved photo's data from the Filesystem
-        const readFile = await Filesystem.readFile({
-          path: photo.filepath,
-          directory: Directory.Data,
-        });
-
-        // Web platform only: Load the photo as base64 data
-        photo.webviewPath = `data:image/jpeg;base64,${readFile.data}`;
+      for (const photo of savedPhotos) {
+        if (photo.filepath.startsWith('delrio_')) {
+          try {
+            const readFile = await Filesystem.readFile({
+              path: photo.filepath,
+              directory: Directory.Data,
+            });
+            photo.webviewPath = `data:image/jpeg;base64,${readFile.data}`;
+          } catch {
+            // fallback al path existente
+          }
+        }
       }
     }
 
-    this.photos.set(photos);
+    this.photos.set(savedPhotos);
   }
 
-  // Delete picture by removing it from reference data and the filesystem
-  public async deletePhoto(photo: UserPhoto, position: number) {
-    // Remove this photo from the Photos signal
-    this.photos.update((photos) => photos.filter((_, index) => index !== position));
+  public toggleLike(position: number) {
+    this.photos.update((list) => {
+      return list.map((item, idx) => {
+        if (idx === position) {
+          const liked = !item.liked;
+          const likes = (item.likes ?? 0) + (liked ? 1 : -1);
+          return { ...item, liked, likes: Math.max(0, likes) };
+        }
+        return item;
+      });
+    });
 
-    // Update the cached photos by overwriting the stored value
     Preferences.set({
       key: this.PHOTO_STORAGE,
       value: JSON.stringify(this.photos()),
     });
-
-    // delete photo file from filesystem
-    const filename = photo.filepath.slice(photo.filepath.lastIndexOf('/') + 1);
-
-    await Filesystem.deleteFile({
-      path: filename,
-      directory: Directory.Data,
-    });
   }
-}
 
-export interface UserPhoto {
-  filepath: string;
-  webviewPath?: string;
+  public async deletePhoto(photo: UserPhoto, position: number) {
+    this.photos.update((photos) => photos.filter((_, index) => index !== position));
+
+    await Preferences.set({
+      key: this.PHOTO_STORAGE,
+      value: JSON.stringify(this.photos()),
+    });
+
+    if (photo.filepath.startsWith('delrio_') || photo.filepath.includes('/')) {
+      try {
+        const filename = photo.filepath.slice(photo.filepath.lastIndexOf('/') + 1);
+        await Filesystem.deleteFile({
+          path: filename,
+          directory: Directory.Data,
+        });
+      } catch (e) {
+        console.warn('No se pudo borrar archivo físico:', e);
+      }
+    }
+  }
 }

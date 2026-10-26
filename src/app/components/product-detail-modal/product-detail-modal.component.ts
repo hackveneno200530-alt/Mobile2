@@ -96,7 +96,7 @@ export class ProductDetailModalComponent implements OnChanges {
     const v = this.selectedVariant();
     if (!v) return 0;
     const inCart = this.cart.getItem(v.id)?.quantity ?? 0;
-    const realStock = v.stock ?? 0;
+    const realStock = Number(v.stock ?? 0);
     return Math.max(0, realStock - inCart);
   });
 
@@ -156,7 +156,7 @@ export class ProductDetailModalComponent implements OnChanges {
       const res = await this.variantService.listWithCache(productId);
       this.variants.set(res.data);
       // Seleccionar automáticamente la primera con stock disponible
-      const firstWithStock = res.data.find((v) => (v.stock ?? 0) > 0);
+      const firstWithStock = res.data.find((v) => Number(v.stock ?? 0) > 0);
       if (firstWithStock) {
         this.selectedVariantId.set(firstWithStock.id);
       } else if (res.data.length > 0) {

@@ -28,6 +28,20 @@ try {
                     FROM product_variants pv
                     LEFT JOIN inventory i ON pv.id = i.variant_id';
 
+        $mapRow = function ($r) {
+            if (!$r) return $r;
+            $r['id'] = (int) $r['id'];
+            $r['product_id'] = (int) $r['product_id'];
+            $r['price'] = (float) $r['price'];
+            $r['stock'] = (int) ($r['stock'] ?? 0);
+            $r['reserved'] = (int) ($r['reserved'] ?? 0);
+            $r['active'] = (bool) $r['active'];
+            if (isset($r['volume_ml']) && $r['volume_ml'] !== null) {
+                $r['volume_ml'] = (int) $r['volume_ml'];
+            }
+            return $r;
+        };
+
         if ($id !== null) {
             $stmt = $pdo->prepare($baseSql . ' WHERE pv.id = :id');
             $stmt->execute(['id' => $id]);
@@ -35,17 +49,19 @@ try {
             if (!$row) {
                 respondData(false, 'Variante no encontrada.', null, 404);
             }
-            respondData(true, 'OK', $row);
+            respondData(true, 'OK', $mapRow($row));
         }
 
         if ($productId !== null) {
             $stmt = $pdo->prepare($baseSql . ' WHERE pv.product_id = :pid ORDER BY pv.id');
             $stmt->execute(['pid' => $productId]);
-            respondData(true, 'OK', $stmt->fetchAll());
+            $rows = array_map($mapRow, $stmt->fetchAll());
+            respondData(true, 'OK', $rows);
         }
 
         $stmt = $pdo->query($baseSql . ' ORDER BY pv.id');
-        respondData(true, 'OK', $stmt->fetchAll());
+        $rows = array_map($mapRow, $stmt->fetchAll());
+        respondData(true, 'OK', $rows);
     }
 
     // ---------- ALTA ----------

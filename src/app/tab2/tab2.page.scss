@@ -1,16 +1,207 @@
-ion-col > button {
-  display: block;
-  width: 100%;
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-  font: inherit;
+.header-toolbar {
+  --background: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-button img {
-  display: block;
-  width: 100%;
-  height: auto;
+.brand-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: #111827;
+
+  .brand-icon {
+    color: #4f46e5;
+    font-size: 1.3rem;
+  }
+}
+
+.category-chips-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 6px;
+  padding-bottom: 8px;
+  background: #ffffff;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  ion-chip {
+    font-weight: 600;
+    font-size: 0.85rem;
+    height: 32px;
+  }
+}
+
+.community-content {
+  --background: #f8fafc;
+}
+
+.community-hero {
+  padding-bottom: 4px;
+
+  h2 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+  }
+
+  p {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.35;
+  }
+}
+
+.photos-grid {
+  padding-bottom: 80px;
+}
+
+.photo-card {
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+  cursor: pointer;
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  .image-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 100%; /* Cuadrado 1:1 */
+    background: #e2e8f0;
+    overflow: hidden;
+
+    img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .tag-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      border-radius: 6px;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(4px);
+    }
+
+    .like-btn {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(6px);
+      border: none;
+      border-radius: 20px;
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      transition: all 0.2s ease;
+
+      ion-icon {
+        font-size: 1rem;
+        color: #64748b;
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      &.is-liked {
+        color: #e11d48;
+        ion-icon {
+          color: #e11d48;
+          transform: scale(1.15);
+        }
+      }
+
+      &:active {
+        transform: scale(0.9);
+      }
+    }
+  }
+
+  .card-info {
+    padding: 10px;
+
+    .photo-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 2px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .photo-date {
+      font-size: 0.7rem;
+      color: #94a3b8;
+    }
+  }
+}
+
+.fab-camera {
+  margin-bottom: 56px;
+  margin-right: 12px;
+
+  ion-fab-button {
+    --background: #4f46e5;
+    --box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
+  }
+}
+
+.preview-modal-content {
+  .preview-image-container {
+    width: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    background: #000;
+
+    .full-preview-image {
+      width: 100%;
+      max-height: 60vh;
+      object-fit: contain;
+      display: block;
+    }
+  }
+
+  .preview-meta {
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 10px 0 4px 0;
+    }
+
+    .preview-date {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin: 0 0 16px 0;
+    }
+
+    .preview-actions {
+      margin-top: 20px;
+    }
+  }
 }

@@ -1,31 +1,102 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title> Photo Gallery </ion-title>
+<ion-header class="ion-no-border">
+  <ion-toolbar class="header-toolbar">
+    <ion-title>
+      <div class="brand-title">
+        <ion-icon name="sparkles" class="brand-icon"></ion-icon>
+        <span>Comunidad Del Río</span>
+      </div>
+    </ion-title>
   </ion-toolbar>
+
+  <!-- Categorías de Galería -->
+  <div class="category-chips-container ion-padding-horizontal">
+    <ion-chip [outline]="selectedCategory() !== 'todos'" [color]="selectedCategory() === 'todos' ? 'primary' : 'medium'" (click)="selectedCategory.set('todos')">
+      Todos
+    </ion-chip>
+    <ion-chip [outline]="selectedCategory() !== 'gorras'" [color]="selectedCategory() === 'gorras' ? 'primary' : 'medium'" (click)="selectedCategory.set('gorras')">
+      Gorras
+    </ion-chip>
+    <ion-chip [outline]="selectedCategory() !== 'sneakers'" [color]="selectedCategory() === 'sneakers' ? 'primary' : 'medium'" (click)="selectedCategory.set('sneakers')">
+      Sneakers
+    </ion-chip>
+    <ion-chip [outline]="selectedCategory() !== 'perfumería'" [color]="selectedCategory() === 'perfumería' ? 'primary' : 'medium'" (click)="selectedCategory.set('perfumería')">
+      Perfumería
+    </ion-chip>
+  </div>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Photo Gallery</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="community-content">
+  <!-- Hero Intro -->
+  <div class="community-hero ion-padding">
+    <h2>Galería de Outfits</h2>
+    <p>Captura con tu cámara y comparte tu combinación de gorras New Era, calzado y fragancias.</p>
+  </div>
 
-  <ion-grid>
+  <!-- Grilla de Fotos Multimedia -->
+  <ion-grid class="photos-grid ion-padding-horizontal">
     <ion-row>
-      @for (photo of photoService.photos(); track photo.filepath; let position = $index) {
-      <ion-col size="6">
-        <button (click)="showActionSheet(photo, position)">
-          <img [src]="photo.webviewPath" [attr.alt]="'Photo ' + (position + 1)" loading="lazy" />
-        </button>
-      </ion-col>
+      @for (photo of filteredPhotos(); track photo.filepath; let i = $index) {
+        <ion-col size="6" size-md="4" size-lg="3">
+          <div class="photo-card" (click)="openPreview(photo, i)">
+            <div class="image-wrapper">
+              <img [src]="photo.webviewPath" [attr.alt]="photo.title" loading="lazy" />
+              <ion-badge color="dark" class="tag-badge">{{ photo.categoryTag || 'Streetwear' }}</ion-badge>
+              <button class="like-btn" [class.is-liked]="photo.liked" (click)="onLike(i, $event)" aria-label="Me gusta">
+                <ion-icon [name]="photo.liked ? 'heart' : 'heart-outline'"></ion-icon>
+                <span>{{ photo.likes || 0 }}</span>
+              </button>
+            </div>
+            <div class="card-info">
+              <h4 class="photo-title">{{ photo.title }}</h4>
+              <span class="photo-date">{{ photo.date }}</span>
+            </div>
+          </div>
+        </ion-col>
       }
     </ion-row>
   </ion-grid>
 
-  <ion-fab vertical="bottom" horizontal="center" slot="fixed">
-    <ion-fab-button (click)="addPhotoToGallery()">
+  <!-- Botón Flotante para Tomar Foto / Abrir Cámara -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="fab-camera">
+    <ion-fab-button (click)="openCameraPrompt()" color="primary">
       <ion-icon name="camera"></ion-icon>
     </ion-fab-button>
   </ion-fab>
+
+  <!-- Modal Interactivo de Previsualización en Pantalla Completa -->
+  <ion-modal [isOpen]="previewPhoto() !== null" (didDismiss)="closePreview()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Detalle de Fotografía</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closePreview()">
+              <ion-icon name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="preview-modal-content ion-padding">
+        @if (previewPhoto()) {
+          <div class="preview-image-container">
+            <img [src]="previewPhoto()!.webviewPath" [attr.alt]="previewPhoto()!.title" class="full-preview-image" />
+          </div>
+
+          <div class="preview-meta ion-padding-top">
+            <ion-badge color="primary">{{ previewPhoto()!.categoryTag }}</ion-badge>
+            <h3>{{ previewPhoto()!.title }}</h3>
+            <p class="preview-date">Publicado: {{ previewPhoto()!.date }}</p>
+
+            <div class="preview-actions">
+              <ion-button expand="block" fill="outline" color="danger" (click)="confirmDelete(previewPhoto()!, previewIndex())">
+                <ion-icon name="trash" slot="start"></ion-icon>
+                Eliminar de Galería
+              </ion-button>
+            </div>
+          </div>
+        }
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

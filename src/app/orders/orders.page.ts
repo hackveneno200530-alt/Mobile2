@@ -87,6 +87,10 @@ export class OrdersPage implements OnInit {
     void this.loadOrders();
   }
 
+  ionViewWillEnter(): void {
+    void this.loadOrders(true);
+  }
+
   async loadOrders(forceRefresh = false): Promise<void> {
     const user = this.auth.currentUser();
     if (!user) {
