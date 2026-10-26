@@ -79,7 +79,7 @@ if ($method === 'GET') {
 
 ## 2. Petición POST
 
-La petición `POST` se utiliza para la creación de nuevos recursos o el envío de cargas útiles estructuradas para operaciones de negocio no idempotentes (ej. autenticación y compras).
+La petición `POST` se utiliza para la creación de nuevos recursos o el envío de cargas útiles estructuradas para operaciones de negocio transaccionales (ej. autenticación y compras).
 
 ### 2.1. Implementación en el Servicio Angular (`OrderService`)
 ```typescript
@@ -135,10 +135,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   Content-Type: application/json
   
   {
-    "user_id": 1,
+    "user_id": 4,
     "delivery_type": "store_pickup",
     "payment_method": "cash",
-    "items": [{ "variant_id": 1, "quantity": 1, "unit_price": 2499.00 }]
+    "items": [{ "variant_id": 9, "quantity": 1, "unit_price": 2199.00 }]
   }
   ```
 - **Respuesta JSON (HTTP 201 Created):**
@@ -147,10 +147,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     "success": true,
     "message": "Pedido confirmado exitosamente.",
     "data": {
-      "order_id": 15,
-      "folio": "DRC-914820",
-      "total": 2499.00,
-      "status": "pending_payment"
+      "order_id": 2,
+      "folio": "DRC-000002",
+      "total": 2199.00,
+      "status": "pending"
     }
   }
   ```
@@ -327,7 +327,6 @@ export interface ApiResponse<T> {
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    // Si el servidor emitió un código de estado específico
     if (error.response) {
       const status = error.response.status;
       const data = error.response.data as ApiResponse<any> | undefined;
@@ -346,11 +345,11 @@ apiClient.interceptors.response.use(
 ```
 
 ### 6.3. Modal Dinámico de Diagnóstico (`ApiErrorModalComponent`)
-Si una petición crítica falla o no hay conexión de red, la aplicación no colapsa ni muestra una pantalla en blanco; despliega un modal visual de diagnóstico con:
-- Código de error HTTP (`500`, `404`, `ECONNREFUSED`).
-- Dirección IP activa que se intentó contactar.
-- Botón interactivo de **"Reintentar conexión"**.
-- Acceso directo a la pantalla de **"Orígenes de datos"** para cambiar la IP sin reiniciar la app.
+Si una petición crítica falla o el servidor responde con error, la aplicación despliega un modal visual de diagnóstico con:
+- Código de error HTTP (`500`, `401`, `404`, `ECONNREFUSED`).
+- Dirección IP y URL destino del endpoint que falló.
+- Payload enviado y cabeceras de respuesta.
+- Acceso directo a la configuración de servidor sin reiniciar la app.
 
 ---
 
@@ -407,13 +406,77 @@ Durante el procesamiento de formularios (`isSubmitting()` o `isProcessing()`), e
 
 ---
 
-## 8. Evidencia del Funcionamiento
+## 8. Evidencia del Funcionamiento en Emulador Google Pixel
 
-### 8.1. Capturas de Pantalla en el Repositorio
-- `desktop-check.png`: Verificación del catálogo en pantalla de escritorio con selector de categorías y carga de productos.
-- `ready-check.png`: Verificación del modal bottom sheet de selección de variantes y adición al carrito.
-- Pantalla de Catálogo [tab1]: Filtro de artículos por categoría (*Gorras, Ropa, Calzado, Perfumes*) con precios "Desde" sincronizados con la base de datos.
-- Pantalla de Checkout [checkout]: Formulario de envío y selección de método de pago con validación en tiempo real.
+A continuación se presenta la secuencia visual de ejecución sobre el emulador Android de Google Pixel con la ubicación de las capturas almacenadas en `C:\Users\hackv\Pictures\android\`:
+
+### 8.1. Autenticación y Selector de IP de Servidor
+Muestra la pantalla de inicio de sesión con el selector dinámico del servidor (`10.0.2.2` para el entorno emulado de Android hacia el localhost del host).
+
+Insertar cap 1 aquí
+
+---
+
+### 8.2. Interceptor de Diagnóstico y Modal de Error HTTP
+Muestra la intercepción de códigos HTTP por parte del cliente Axios y la presentación amigable de errores técnicos en pantalla.
+
+Insertar cap 2 aquí
+
+---
+
+### 8.3. Catálogo Principal con Carga de Productos vía GET
+Renderizado de la cuadrícula de artículos recuperados desde la base de datos MySQL mediante la petición `GET /catalog/products.php`.
+
+Insertar cap 3 aquí
+
+---
+
+### 8.4. Filtrado de Artículos por Categoría
+Muestra el consumo de la API mediante parámetros de consulta (`?category_id=4`) al seleccionar el chip "Calzado".
+
+Insertar cap 4 aquí
+
+---
+
+### 8.5. Modal Bottom Sheet de Variantes con Stock en Vivo
+Consulta y renderizado de tallas, colores y existencias disponibles en almacén vía `GET /catalog/variants.php`.
+
+Insertar cap 5 aquí
+
+---
+
+### 8.6. Carrito de Compras Local Reactivo
+Gestión del estado de compras local con cálculo automático de subtotales, regla de envío gratis y persistencia en memoria y Preferences.
+
+Insertar cap 6 aquí
+
+---
+
+### 8.7. Formulario Transaccional de Checkout
+Pantalla de confirmación de pedido con selección de método de entrega (Recolección en Tienda / Envío) y método de pago (Efectivo / SPEI).
+
+Insertar cap 7 aquí
+
+---
+
+### 8.8. Confirmación de Compra Transaccional (POST) y Ticket
+Resultado exitoso de la petición `POST /orders/checkout.php` con código HTTP 201 Created y generación del folio único de compra (`DRC-000002`).
+
+Insertar cap 8 aquí
+
+---
+
+### 8.9. Historial de Pedidos del Cliente vía REST
+Listado de compras históricas del usuario autenticado consultadas al endpoint `GET /orders/list.php?user_id=X`.
+
+Insertar cap 9 aquí
+
+---
+
+### 8.10. Diagnóstico de Orígenes de Datos y Caché Local
+Panel de control de red con verificación de protocolo HTTP, dirección IP activa, puerto y estado del almacenamiento en caché sin conexión.
+
+Insertar cap 10 aquí
 
 ---
 
@@ -423,29 +486,16 @@ El código del proyecto se encuentra versionado y publicado en GitHub bajo la ra
 
 - **URL del Repositorio:** `https://github.com/hackveneno200530-alt/Mobile2.git`
 - **Rama:** `main`
-- **Último Commit:** `c624b48`
-- **Mensaje del Commit:**
+- **Mensaje de Confirmación:**
   ```text
   feat(api-rest): implementacion completa de consumo RESTful (GET, POST, PUT, DELETE) con servicios Angular, manejo de errores y loading
   ```
-
-### Verificación de Estado en Terminal:
-```bash
-git status
-# On branch main
-# Your branch is up to date with 'origin/main'.
-# nothing to commit, working tree clean
-
-git log -n 2 --oneline
-# c624b48 feat(api-rest): implementacion completa de consumo RESTful (GET, POST, PUT, DELETE) con servicios Angular, manejo de errores y loading
-# 19b1663 Carrito local con persistencia y sesion persistente via Preferences
-```
 
 ---
 
 ## 10. Prompts Utilizados en el Desarrollo
 
-Conforme a las indicaciones del profesor, se presentan los tres prompts clave utilizados con el asistente de Inteligencia Artificial para llevar a cabo esta práctica:
+Conforme a las indicaciones del docente, se presentan los tres prompts clave utilizados con el asistente de Inteligencia Artificial para llevar a cabo esta práctica:
 
 ### Prompt 1: Creación de Servicios y Consumo de los Verbos HTTP (GET, POST, PUT, DELETE)
 > *"Actúa como Desarrollador Senior en Ionic 9 y Angular 22 Standalone. Necesito conectar nuestra aplicación móvil con la API REST en PHP y MySQL. Implementa los servicios Angular para el catálogo de productos (ProductService) y variantes (ProductVariantService) con soporte para los cuatro métodos HTTP fundamentales: GET para listar y consultar por categoría, POST para crear nuevos artículos, PUT para actualización parcial/total de campos, y DELETE para eliminación con borrado en cascada. Centraliza todas las peticiones a través de nuestro cliente compartido Axios respetando el tipado genérico ApiResponse<T>."*
