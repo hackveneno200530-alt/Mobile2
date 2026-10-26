@@ -19,6 +19,7 @@ npm-debug.log*
 
 /.angular
 /.idea
+/android/.idea
 /.ionic
 /.sass-cache
 /.sourcemaps
@@ -33,3 +34,4 @@ npm-debug.log*
 
 # Stray Gradle cache (native build artifacts live under android/)
 /.gradle
+/scratch

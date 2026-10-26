@@ -1,0 +1,354 @@
+.checkout-toolbar {
+  --background: #f7f9fa;
+  --border-width: 0;
+
+  .checkout-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1e272e;
+  }
+}
+
+.checkout-content {
+  --background: #f7f9fa;
+}
+
+.checkout-flow-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding-bottom: 30px;
+}
+
+.section-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: #1e272e;
+    margin: 0 0 14px 0;
+
+    ion-icon {
+      font-size: 1.2rem;
+      color: #4a69bd;
+    }
+  }
+}
+
+.options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-pill {
+  border: 2px solid #eef1f4;
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  .option-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+
+    .option-name {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #2f3640;
+    }
+
+    .option-price {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #1e272e;
+    }
+
+    .pill-icon {
+      font-size: 1.2rem;
+      color: #718093;
+    }
+  }
+
+  .option-desc {
+    font-size: 0.78rem;
+    color: #718093;
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  &.selected {
+    border-color: #1e272e;
+    background: #f8fafc;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+
+    .pill-icon {
+      color: #1e272e;
+    }
+  }
+}
+
+.form-group {
+  margin-bottom: 14px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .input-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #576574;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+
+  .custom-input,
+  .custom-textarea {
+    width: 100%;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 0.92rem;
+    color: #1e272e;
+    background: #fbfcfd;
+    outline: none;
+    transition: border-color 0.2s ease;
+
+    &:focus {
+      border-color: #1e272e;
+      background: #ffffff;
+    }
+  }
+}
+
+.summary-card {
+  .summary-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.88rem;
+    color: #576574;
+    margin-bottom: 8px;
+
+    .green-text {
+      color: #2ed573;
+      font-weight: 700;
+    }
+
+    &.total-line {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #1e272e;
+      margin-top: 10px;
+      margin-bottom: 16px;
+    }
+  }
+
+  .divider {
+    height: 1px;
+    background: #f1f2f6;
+    margin: 10px 0;
+  }
+
+  .confirm-order-btn {
+    width: 100%;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #1e272e 0%, #2f3640 100%);
+    color: #ffffff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(30, 39, 46, 0.25);
+    transition: transform 0.15s ease;
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    &:disabled {
+      background: #b2bec3;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .btn-spinner {
+      --color: #ffffff;
+      width: 22px;
+      height: 22px;
+    }
+  }
+}
+
+// -------------------------------------------------------------
+// TICKET DE COMPRA CONFIRMADA
+// -------------------------------------------------------------
+.ticket-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0 40px 0;
+}
+
+.ticket-card {
+  width: 100%;
+  max-width: 440px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 28px 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+
+  .ticket-stamp {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: #e8faf0;
+    color: #2ed573;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    margin-bottom: 12px;
+  }
+
+  .ticket-brand {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #718093;
+  }
+
+  .ticket-success-title {
+    font-size: 1.45rem;
+    font-weight: 900;
+    color: #1e272e;
+    margin: 4px 0 6px 0;
+  }
+
+  .ticket-subtitle {
+    font-size: 0.88rem;
+    color: #576574;
+    line-height: 1.4;
+    margin: 0 0 20px 0;
+  }
+
+  .ticket-details-box {
+    width: 100%;
+    background: #f8fafc;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 24px;
+
+    .ticket-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.86rem;
+
+      .t-label {
+        color: #718093;
+        font-weight: 500;
+      }
+
+      .t-value {
+        color: #1e272e;
+        font-weight: 700;
+      }
+
+      .t-folio {
+        font-family: monospace;
+        font-size: 0.98rem;
+        background: #1e272e;
+        color: #ffffff;
+        padding: 2px 8px;
+        border-radius: 6px;
+      }
+
+      &.total-row {
+        margin-top: 10px;
+        margin-bottom: 0;
+
+        .t-label {
+          font-size: 1rem;
+          font-weight: 800;
+          color: #1e272e;
+        }
+
+        .t-total {
+          font-size: 1.3rem;
+          font-weight: 900;
+          color: #1e272e;
+        }
+      }
+    }
+
+    .ticket-divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 10px 0;
+    }
+  }
+
+  .ticket-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .view-orders-btn {
+      width: 100%;
+      height: 48px;
+      border-radius: 12px;
+      background: #1e272e;
+      color: #ffffff;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+    }
+
+    .continue-btn {
+      width: 100%;
+      height: 44px;
+      border-radius: 12px;
+      background: transparent;
+      color: #576574;
+      border: 1px solid #cbd5e1;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+    }
+  }
+}

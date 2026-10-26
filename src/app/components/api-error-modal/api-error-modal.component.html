@@ -1,0 +1,74 @@
+<ion-modal [isOpen]="isOpen()" (didDismiss)="close()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="danger">
+        <ion-title>Error de conexion</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="close()">
+            <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding" *ngIf="error() as err">
+      <ion-list>
+        <ion-item>
+          <ion-label>
+            <h3>Mensaje</h3>
+            <p>{{ err.message }}</p>
+          </ion-label>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>
+            <h3>IP / URL de destino</h3>
+            <p>{{ err.url }}</p>
+          </ion-label>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>
+            <h3>Metodo</h3>
+            <p>{{ err.method }}</p>
+          </ion-label>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>
+            <h3>Codigo de estado</h3>
+            <p>{{ err.statusCode ?? 'Sin respuesta del servidor' }}</p>
+          </ion-label>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>
+            <h3>Conexion a internet del dispositivo</h3>
+            <p>{{ err.online ? 'Conectado' : 'Sin conexion' }}</p>
+          </ion-label>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>
+            <h3>Payload enviado</h3>
+            <p class="mono">{{ err.payload | json }}</p>
+          </ion-label>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>
+            <h3>Cabeceras enviadas</h3>
+            <p class="mono">{{ err.requestHeaders | json }}</p>
+          </ion-label>
+        </ion-item>
+
+        <ion-item *ngIf="err.responseHeaders" lines="none">
+          <ion-label>
+            <h3>Cabeceras de respuesta</h3>
+            <p class="mono">{{ err.responseHeaders | json }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ng-template>
+</ion-modal>

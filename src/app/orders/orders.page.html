@@ -1,0 +1,153 @@
+<ion-header [translucent]="true">
+  <ion-toolbar class="orders-toolbar">
+    <ion-title class="orders-title">Mis Pedidos</ion-title>
+    <ion-buttons slot="end">
+      @if (auth.currentUser()) {
+        <ion-button (click)="logout()" title="Cerrar sesión" class="logout-btn">
+          <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+        </ion-button>
+      }
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="orders-content ion-padding">
+  <!-- Pull to Refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content
+      pullingIcon="refresh-outline"
+      pullingText="Desliza para actualizar pedidos"
+      refreshingSpinner="crescent"
+    ></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Banner si se muestra desde caché -->
+  @if (fromCache()) {
+    <div class="cache-indicator">
+      <ion-icon name="time-outline"></ion-icon>
+      <span>Mostrando historial guardado en el dispositivo</span>
+    </div>
+  }
+
+  <!-- Si no ha iniciado sesión -->
+  @if (!auth.currentUser()) {
+    <div class="login-prompt-card">
+      <div class="prompt-icon">
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </div>
+      <h3>Accede a tu Cuenta</h3>
+      <p>Inicia sesión con tu correo para consultar tus compras anteriores y rastrear tus envíos en tiempo real.</p>
+      <button type="button" class="login-cta-btn" (click)="goToLogin()">
+        Iniciar Sesión
+      </button>
+    </div>
+  } @else {
+    <!-- Perfil del Cliente Header -->
+    @if (auth.currentUser(); as user) {
+      <div class="client-profile-card">
+        <div class="avatar-circle">
+          <span>{{ user.first_name.charAt(0) }}{{ user.last_name ? user.last_name.charAt(0) : '' }}</span>
+        </div>
+        <div class="profile-info">
+          <h3 class="client-name">{{ user.first_name }} {{ user.last_name }}</h3>
+          <span class="client-email">{{ user.email }}</span>
+        </div>
+      </div>
+    }
+
+    <!-- Skeletons durante carga -->
+    @if (loading()) {
+      <div class="orders-list">
+        @for (i of [1, 2]; track i) {
+          <div class="skeleton-order-card">
+            <ion-skeleton-text [animated]="true" style="width: 50%; height: 18px;"></ion-skeleton-text>
+            <ion-skeleton-text [animated]="true" style="width: 80%; height: 14px; margin-top: 8px;"></ion-skeleton-text>
+            <ion-skeleton-text [animated]="true" style="width: 40%; height: 22px; margin-top: 12px;"></ion-skeleton-text>
+          </div>
+        }
+      </div>
+    } @else {
+      <!-- Empty State -->
+      @if (orders().length === 0) {
+        <div class="empty-orders-state">
+          <div class="empty-icon-circle">
+            <ion-icon name="receipt-outline"></ion-icon>
+          </div>
+          <h3>Aún no tienes pedidos</h3>
+          <p>Cuando realices una compra de gorras, ropa o fragancias, aparecerá aquí el estado y folio de tu orden.</p>
+          <button type="button" class="shop-now-btn" (click)="goToCatalog()">
+            Explorar Tienda
+          </button>
+        </div>
+      } @else {
+        <!-- Lista de Pedidos -->
+        <div class="orders-list">
+          @for (order of orders(); track order.id) {
+            <div class="order-card">
+              <div class="order-card-header">
+                <div class="order-folio-wrap">
+                  <span class="folio-badge">{{ order.folio || ('DRC-' + order.id) }}</span>
+                  <span class="order-date">{{ order.created_at | date: 'dd/MM/yyyy • HH:mm' }}</span>
+                </div>
+
+                <ion-badge [color]="getStatusBadgeColor(order.status)" class="status-badge">
+                  {{ getStatusLabel(order.status) }}
+                </ion-badge>
+              </div>
+
+              <div class="order-summary-row">
+                <div class="summary-col">
+                  <span class="col-label">Entrega a</span>
+                  <span class="col-val">{{ order.recipient_name || 'Cliente' }}</span>
+                </div>
+
+                <div class="summary-col text-right">
+                  <span class="col-label">Total</span>
+                  <span class="col-val total-price">{{ order.total | currency: 'MXN': 'symbol': '1.0-0' }}</span>
+                </div>
+              </div>
+
+              @if (order.shipping_address) {
+                <div class="address-hint">
+                  <ion-icon name="car-outline"></ion-icon>
+                  <span>{{ order.shipping_address }}</span>
+                </div>
+              }
+
+              <!-- Botón Desplegable de Partidas -->
+              @if (order.items && order.items.length > 0) {
+                <div class="items-toggle-btn" (click)="toggleExpand(order.id)">
+                  <span>{{ order.items.length }} {{ order.items.length === 1 ? 'artículo' : 'artículos' }}</span>
+                  <ion-icon [name]="expandedOrderId() === order.id ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+                </div>
+
+                <!-- Desglose de Artículos -->
+                @if (expandedOrderId() === order.id) {
+                  <div class="order-items-breakdown">
+                    @for (item of order.items; track item.id) {
+                      <div class="breakdown-item">
+                        <div class="b-item-info">
+                          <span class="b-item-name">{{ item.product_name || 'Artículo Del Río' }}</span>
+                          <div class="b-item-variants">
+                            @if (item.size) { <span>Talla: {{ item.size }}</span> }
+                            @if (item.volume_ml) { <span>{{ item.volume_ml }} ml</span> }
+                            @if (item.color) { <span>{{ item.color }}</span> }
+                          </div>
+                        </div>
+
+                        <div class="b-item-price">
+                          <span class="b-qty">{{ item.quantity }}x</span>
+                          <span class="b-subtotal">{{ item.subtotal | currency: 'MXN': 'symbol': '1.0-0' }}</span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              }
+            </div>
+          }
+        </div>
+      }
+    }
+  }
+</ion-content>

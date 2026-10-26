@@ -1,4 +1,18 @@
 <ion-content [fullscreen]="true" class="login-content">
+  <div class="server-config">
+    <span class="server-config__label">Servidor</span>
+    <input
+      class="server-config__input"
+      type="text"
+      placeholder="ej. 10.0.2.2 o 192.168.1.103:80"
+      name="serverAddress"
+      [(ngModel)]="serverAddressInput"
+    />
+    <button type="button" class="server-config__button" (click)="saveServerAddress()">
+      {{ serverSaved ? 'Guardado' : 'Guardar' }}
+    </button>
+  </div>
+
   <div class="main">
     <div class="container a-container" [class.is-txl]="toggled">
       <form id="a-form" class="form" method="" action="" (submit)="onSignUp($event)">
@@ -12,6 +26,17 @@
         <input class="form__input" type="text" placeholder="Name" name="signUpName" [(ngModel)]="signUpName" required />
         <input class="form__input" type="email" placeholder="Email" name="signUpEmail" [(ngModel)]="signUpEmail" required />
         <input class="form__input" type="password" placeholder="Password" name="signUpPassword" [(ngModel)]="signUpPassword" required />
+
+        <div class="api-diagnostics" *ngIf="!toggled && diagnostics.lastCall() as call">
+          <p class="api-diagnostics__status" [class.api-diagnostics__status--ok]="call.success" [class.api-diagnostics__status--error]="!call.success">
+            {{ call.success ? 'Acceso correcto' : 'Error de acceso' }} — {{ call.message }}
+          </p>
+          <p class="api-diagnostics__line"><strong>IP destino:</strong> {{ call.url }}</p>
+          <p class="api-diagnostics__line"><strong>Red:</strong> {{ call.online ? 'Conectado' : 'Sin conexion' }}</p>
+          <p class="api-diagnostics__line"><strong>Payload:</strong> {{ call.payload | json }}</p>
+          <p class="api-diagnostics__line"><strong>Cabeceras:</strong> {{ call.requestHeaders | json }}</p>
+        </div>
+
         <span class="form__error" *ngIf="errorMessage && !toggled">{{ errorMessage }}</span>
         <button type="submit" class="form__button button submit" [disabled]="loading">SIGN UP</button>
       </form>
@@ -28,6 +53,17 @@
         <span class="form__span">or use your email account</span>
         <input class="form__input" type="email" placeholder="Email" name="signInEmail" [(ngModel)]="signInEmail" required />
         <input class="form__input" type="password" placeholder="Password" name="signInPassword" [(ngModel)]="signInPassword" required />
+
+        <div class="api-diagnostics" *ngIf="toggled && diagnostics.lastCall() as call">
+          <p class="api-diagnostics__status" [class.api-diagnostics__status--ok]="call.success" [class.api-diagnostics__status--error]="!call.success">
+            {{ call.success ? 'Acceso correcto' : 'Error de acceso' }} — {{ call.message }}
+          </p>
+          <p class="api-diagnostics__line"><strong>IP destino:</strong> {{ call.url }}</p>
+          <p class="api-diagnostics__line"><strong>Red:</strong> {{ call.online ? 'Conectado' : 'Sin conexion' }}</p>
+          <p class="api-diagnostics__line"><strong>Payload:</strong> {{ call.payload | json }}</p>
+          <p class="api-diagnostics__line"><strong>Cabeceras:</strong> {{ call.requestHeaders | json }}</p>
+        </div>
+
         <a class="form__link">Forgot your password?</a>
         <span class="form__error" *ngIf="errorMessage && toggled">{{ errorMessage }}</span>
         <button type="submit" class="form__button button submit" [disabled]="loading">SIGN IN</button>
@@ -51,4 +87,6 @@
       </div>
     </div>
   </div>
+
+  <app-api-error-modal></app-api-error-modal>
 </ion-content>

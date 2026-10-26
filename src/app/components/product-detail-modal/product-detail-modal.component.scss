@@ -1,0 +1,280 @@
+.modal-header {
+  ion-toolbar {
+    --background: #f7f9fa;
+    --border-width: 0;
+  }
+}
+
+.modal-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1a1e24;
+}
+
+.close-btn {
+  --color: #6c757d;
+  font-size: 1.4rem;
+}
+
+.modal-content {
+  --background: #f7f9fa;
+}
+
+// Hero compacto horizontal para que no consuma todo el alto de la pantalla
+.product-hero {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 12px 14px;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.04);
+  margin-bottom: 12px;
+
+  .product-image-wrap {
+    width: 90px;
+    height: 90px;
+    flex-shrink: 0;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #eceff1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .product-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .product-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+
+    .brand-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #4a69bd;
+    }
+
+    .product-name {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #182026;
+      margin: 0;
+      line-height: 1.25;
+    }
+
+    .price-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 4px;
+
+      .current-price {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #1e272e;
+      }
+
+      .stock-badge {
+        font-size: 0.7rem;
+        padding: 4px 8px;
+        border-radius: 6px;
+      }
+    }
+  }
+}
+
+.product-desc {
+  font-size: 0.85rem;
+  color: #576574;
+  line-height: 1.4;
+  margin: 0 4px 12px 4px;
+}
+
+.variants-section {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 14px 16px;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.04);
+  margin-bottom: 16px;
+}
+
+.loading-variants {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+  color: #718093;
+  font-size: 0.9rem;
+  gap: 8px;
+}
+
+.selector-group {
+  margin-bottom: 14px;
+
+  .group-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #2f3640;
+    margin-bottom: 8px;
+  }
+
+  .chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .variant-chip {
+    margin: 0;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+
+    &:active {
+      transform: scale(0.96);
+    }
+  }
+}
+
+.quantity-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid #f1f2f6;
+
+  .quantity-info {
+    display: flex;
+    flex-direction: column;
+
+    .qty-label {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #2f3640;
+    }
+
+    .stock-note {
+      font-size: 0.72rem;
+      color: #718093;
+    }
+  }
+}
+
+.quantity-stepper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f1f2f6;
+  border-radius: 10px;
+  padding: 3px 8px;
+
+  .stepper-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #ffffff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    color: #1e272e;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  }
+
+  .stepper-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e272e;
+    min-width: 22px;
+    text-align: center;
+  }
+}
+
+// -------------------------------------------------------------
+// FOOTER FIJO (SIEMPRE VISIBLE)
+// -------------------------------------------------------------
+.modal-footer-wrap {
+  background: #ffffff;
+  border-top: 1px solid #edf1f5;
+  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.05);
+
+  .modal-footer-action {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 18px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+
+    .subtotal-box {
+      display: flex;
+      flex-direction: column;
+
+      .subtotal-label {
+        font-size: 0.72rem;
+        color: #718093;
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+
+      .subtotal-value {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #1e272e;
+      }
+    }
+
+    .add-to-cart-btn {
+      flex: 1;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #1e272e 0%, #2f3640 100%);
+      color: #ffffff;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(30, 39, 46, 0.25);
+      transition: transform 0.15s ease;
+
+      .btn-icon {
+        font-size: 1.2rem;
+      }
+
+      &:active {
+        transform: scale(0.98);
+      }
+
+      &:disabled {
+        background: #b2bec3;
+        box-shadow: none;
+        cursor: not-allowed;
+      }
+    }
+  }
+}

@@ -1,0 +1,182 @@
+<ion-modal
+  [isOpen]="isOpen"
+  (didDismiss)="close()"
+  [breakpoints]="[0, 0.9, 1]"
+  [initialBreakpoint]="1"
+  handleBehavior="cycle"
+  class="product-sheet-modal"
+>
+  <ng-template>
+    <ion-header class="ion-no-border modal-header">
+      <ion-toolbar>
+        <ion-title class="modal-title">Detalle de Artículo</ion-title>
+        <ion-buttons slot="end">
+          <ion-button fill="clear" (click)="close()" class="close-btn">
+            <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="modal-content ion-padding" *ngIf="product as p">
+      <!-- Imagen y Meta Compacta -->
+      <div class="product-hero">
+        <div class="product-image-wrap">
+          <img
+            [src]="p.image_url || 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=600'"
+            [alt]="p.name"
+            class="product-image"
+          />
+        </div>
+
+        <div class="product-meta">
+          <span class="brand-tag">{{ p.brand || 'Del Río Caps' }}</span>
+          <h2 class="product-name">{{ p.name }}</h2>
+
+          <div class="price-row">
+            <span class="current-price">{{ currentPrice() | currency: 'MXN': 'symbol': '1.0-0' }}</span>
+            <ion-badge
+              [color]="availableStock() <= 0 ? 'danger' : availableStock() <= 3 ? 'warning' : 'success'"
+              class="stock-badge"
+            >
+              @if (availableStock() <= 0) {
+                Agotado
+              } @else if (availableStock() <= 3) {
+                ¡Solo quedan {{ availableStock() }}!
+              } @else {
+                Disponible ({{ availableStock() }} pzs)
+              }
+            </ion-badge>
+          </div>
+        </div>
+      </div>
+
+      @if (p.description) {
+        <p class="product-desc">{{ p.description }}</p>
+      }
+
+      <!-- Selector de Variantes -->
+      <div class="variants-section">
+        @if (loadingVariants()) {
+          <div class="loading-variants">
+            <ion-spinner name="crescent"></ion-spinner>
+            <p>Cargando disponibilidad...</p>
+          </div>
+        } @else {
+          <!-- Selector para Perfumes / Fragancias: Volumen y Presentación -->
+          @if (hasVolume()) {
+            <div class="selector-group">
+              <span class="group-label">Presentación y Volumen</span>
+              <div class="chips-container">
+                @for (v of variants(); track v.id) {
+                  <ion-chip
+                    [outline]="selectedVariant().id !== v.id"
+                    [color]="selectedVariant().id === v.id ? 'dark' : 'medium'"
+                    (click)="selectVariant(v)"
+                    class="variant-chip"
+                  >
+                    <ion-label>
+                      {{ v.volume_ml }} ml @if (v.size) { ({{ v.size }}) } — {{ v.price | currency: 'MXN': 'symbol': '1.0-0' }}
+                    </ion-label>
+                  </ion-chip>
+                }
+              </div>
+            </div>
+          } @else {
+            <!-- Selector para Gorras, Ropa y Calzado: Talla -->
+            @if (sizes().length > 0) {
+              <div class="selector-group">
+                <span class="group-label">Selecciona Talla</span>
+                <div class="chips-container">
+                  @for (size of sizes(); track size) {
+                    <ion-chip
+                      [outline]="selectedVariant().size !== size"
+                      [color]="selectedVariant().size === size ? 'dark' : 'medium'"
+                      (click)="selectBySize(size)"
+                      class="variant-chip"
+                    >
+                      <ion-label>{{ size }}</ion-label>
+                    </ion-chip>
+                  }
+                </div>
+              </div>
+            }
+          }
+
+          <!-- Selector de Color (si aplica) -->
+          @if (colors().length > 1) {
+            <div class="selector-group">
+              <span class="group-label">Color / Acabado</span>
+              <div class="chips-container">
+                @for (color of colors(); track color) {
+                  <ion-chip
+                    [outline]="selectedVariant().color !== color"
+                    [color]="selectedVariant().color === color ? 'dark' : 'medium'"
+                    (click)="selectByColor(color)"
+                    class="variant-chip"
+                  >
+                    <ion-label>{{ color }}</ion-label>
+                  </ion-chip>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Control de Cantidad -->
+          <div class="quantity-section">
+            <div class="quantity-info">
+              <span class="qty-label">Cantidad</span>
+              <span class="stock-note">
+                @if (availableStock() > 0) {
+                  Máx. permitido: {{ availableStock() }}
+                } @else {
+                  Sin unidades disponibles
+                }
+              </span>
+            </div>
+
+            <div class="quantity-stepper">
+              <button
+                type="button"
+                class="stepper-btn"
+                (click)="decrementQty()"
+                [disabled]="quantity() <= 1"
+              >
+                <ion-icon name="remove-outline"></ion-icon>
+              </button>
+              <span class="stepper-value">{{ quantity() }}</span>
+              <button
+                type="button"
+                class="stepper-btn"
+                (click)="incrementQty()"
+                [disabled]="quantity() >= availableStock()"
+              >
+                <ion-icon name="add-outline"></ion-icon>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </ion-content>
+
+    <!-- Barra de Acción Inferior FIJA en ion-footer (siempre visible) -->
+    <ion-footer class="ion-no-border modal-footer-wrap">
+      <div class="modal-footer-action">
+        <div class="subtotal-box">
+          <span class="subtotal-label">Subtotal</span>
+          <span class="subtotal-value">{{ subtotal() | currency: 'MXN': 'symbol': '1.0-0' }}</span>
+        </div>
+
+        <button
+          type="button"
+          class="add-to-cart-btn"
+          [disabled]="loadingVariants() || availableStock() <= 0"
+          (click)="addToCart()"
+        >
+          <ion-icon name="cart-outline" class="btn-icon"></ion-icon>
+          <span>{{ availableStock() <= 0 ? 'Sin Stock' : 'Agregar al Carrito' }}</span>
+        </button>
+      </div>
+    </ion-footer>
+  </ng-template>
+</ion-modal>

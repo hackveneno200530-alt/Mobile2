@@ -1,0 +1,220 @@
+<ion-header [translucent]="true">
+  <ion-toolbar class="checkout-toolbar">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tab3" text="Carrito"></ion-back-button>
+    </ion-buttons>
+    <ion-title class="checkout-title">
+      {{ confirmedOrder() ? 'Confirmación' : 'Finalizar Pedido' }}
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="checkout-content ion-padding">
+  @if (!confirmedOrder()) {
+    <div class="checkout-flow-container">
+      <!-- 1. Método de Entrega -->
+      <div class="section-card">
+        <h3 class="section-title">
+          <ion-icon name="storefront-outline"></ion-icon>
+          <span>Método de Entrega</span>
+        </h3>
+
+        <div class="options-grid">
+          <div
+            class="option-pill"
+            [class.selected]="deliveryType() === 'store_pickup'"
+            (click)="setDeliveryType('store_pickup')"
+          >
+            <div class="option-header">
+              <span class="option-name">Recoger en Tienda</span>
+              <ion-badge color="success">Gratis</ion-badge>
+            </div>
+            <p class="option-desc">Sucursal Matriz Del Río Caps. Listo en 2 hrs.</p>
+          </div>
+
+          <div
+            class="option-pill"
+            [class.selected]="deliveryType() === 'home_delivery'"
+            (click)="setDeliveryType('home_delivery')"
+          >
+            <div class="option-header">
+              <span class="option-name">Envío a Domicilio</span>
+              <span class="option-price">{{ cart.shippingCost() === 0 ? 'Gratis' : '$99' }}</span>
+            </div>
+            <p class="option-desc">Entrega de 2 a 4 días hábiles en tu puerta.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Datos de Contacto y Envío -->
+      <div class="section-card">
+        <h3 class="section-title">
+          <ion-icon name="location-outline"></ion-icon>
+          <span>Datos del Receptor</span>
+        </h3>
+
+        <div class="form-group">
+          <label class="input-label">Nombre Completo *</label>
+          <input
+            type="text"
+            class="custom-input"
+            placeholder="Ej. Juan Pérez"
+            [value]="recipientName()"
+            (input)="recipientName.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="input-label">Teléfono de Contacto (WhatsApp) *</label>
+          <input
+            type="tel"
+            class="custom-input"
+            placeholder="Ej. 614 123 4567"
+            [value]="recipientPhone()"
+            (input)="recipientPhone.set($any($event.target).value)"
+          />
+        </div>
+
+        @if (deliveryType() === 'home_delivery') {
+          <div class="form-group">
+            <label class="input-label">Dirección Completa de Envío *</label>
+            <textarea
+              rows="3"
+              class="custom-textarea"
+              placeholder="Calle, Número exterior/interior, Colonia, C.P., Referencias..."
+              [value]="shippingAddress()"
+              (input)="shippingAddress.set($any($event.target).value)"
+            ></textarea>
+          </div>
+        }
+      </div>
+
+      <!-- 3. Método de Pago -->
+      <div class="section-card">
+        <h3 class="section-title">
+          <ion-icon name="cash-outline"></ion-icon>
+          <span>Método de Pago</span>
+        </h3>
+
+        <div class="options-grid">
+          <div
+            class="option-pill"
+            [class.selected]="paymentMethod() === 'cash_on_delivery'"
+            (click)="setPaymentMethod('cash_on_delivery')"
+          >
+            <div class="option-header">
+              <span class="option-name">Efectivo contra Entrega</span>
+              <ion-icon name="cash-outline" class="pill-icon"></ion-icon>
+            </div>
+            <p class="option-desc">Pagas al recibir o recoger tu pedido.</p>
+          </div>
+
+          <div
+            class="option-pill"
+            [class.selected]="paymentMethod() === 'bank_transfer'"
+            (click)="setPaymentMethod('bank_transfer')"
+          >
+            <div class="option-header">
+              <span class="option-name">Transferencia SPEI</span>
+              <ion-icon name="card-outline" class="pill-icon"></ion-icon>
+            </div>
+            <p class="option-desc">Recibe datos CLABE al confirmar el pedido.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen y Confirmación -->
+      <div class="section-card summary-card">
+        <div class="summary-line">
+          <span>Subtotal ({{ cart.totalCount() }} pzs)</span>
+          <span>{{ cart.subtotal() | currency: 'MXN': 'symbol': '1.0-0' }}</span>
+        </div>
+        <div class="summary-line">
+          <span>Envío</span>
+          <span [class.green-text]="cart.shippingCost() === 0">
+            {{ cart.shippingCost() === 0 ? '¡GRATIS!' : (cart.shippingCost() | currency: 'MXN': 'symbol': '1.0-0') }}
+          </span>
+        </div>
+        <div class="divider"></div>
+        <div class="summary-line total-line">
+          <span>Total a Pagar</span>
+          <span>{{ cart.total() | currency: 'MXN': 'symbol': '1.0-0' }}</span>
+        </div>
+
+        <button
+          type="button"
+          class="confirm-order-btn"
+          [disabled]="processing()"
+          (click)="submitOrder()"
+        >
+          @if (processing()) {
+            <ion-spinner name="crescent" class="btn-spinner"></ion-spinner>
+            <span>Verificando Inventario...</span>
+          } @else {
+            <ion-icon name="bag-check-outline"></ion-icon>
+            <span>Confirmar Pedido ({{ cart.total() | currency: 'MXN': 'symbol': '1.0-0' }})</span>
+          }
+        </button>
+      </div>
+    </div>
+  } @else {
+    <!-- TICKET DE COMPRA CONFIRMADA -->
+    @if (confirmedOrder(); as order) {
+      <div class="ticket-container">
+        <div class="ticket-card">
+          <div class="ticket-stamp">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+          </div>
+
+          <span class="ticket-brand">Del Río Caps</span>
+          <h2 class="ticket-success-title">¡Pedido Confirmado!</h2>
+          <p class="ticket-subtitle">Gracias por tu preferencia. Tu orden ya está en preparación.</p>
+
+          <div class="ticket-details-box">
+            <div class="ticket-row">
+              <span class="t-label">Folio de Orden:</span>
+              <span class="t-value t-folio">{{ order.folio }}</span>
+            </div>
+
+            <div class="ticket-row">
+              <span class="t-label">Fecha y Hora:</span>
+              <span class="t-value">{{ order.created_at | date: 'medium' }}</span>
+            </div>
+
+            <div class="ticket-row">
+              <span class="t-label">Entrega:</span>
+              <span class="t-value">
+                {{ deliveryType() === 'store_pickup' ? 'Recolección en Tienda' : 'Envío a Domicilio' }}
+              </span>
+            </div>
+
+            <div class="ticket-row">
+              <span class="t-label">Método de Pago:</span>
+              <span class="t-value">
+                {{ paymentMethod() === 'cash_on_delivery' ? 'Efectivo contra Entrega' : 'Transferencia SPEI' }}
+              </span>
+            </div>
+
+            <div class="ticket-divider"></div>
+
+            <div class="ticket-row total-row">
+              <span class="t-label">Total:</span>
+              <span class="t-value t-total">{{ order.total | currency: 'MXN': 'symbol': '1.0-0' }}</span>
+            </div>
+          </div>
+
+          <div class="ticket-actions">
+            <button type="button" class="view-orders-btn" (click)="goToOrders()">
+              <ion-icon name="receipt-outline"></ion-icon>
+              <span>Ver en Mis Pedidos</span>
+            </button>
+
+            <button type="button" class="continue-btn" (click)="goToCatalog()">
+              Seguir Explorando
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</ion-content>

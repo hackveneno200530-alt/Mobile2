@@ -1,3 +1,10 @@
 <ion-app>
+  <!-- Mensaje adecuado al usuario, visible en toda la app mientras no haya
+       conexion. No bloquea nada: solo informa, para que el usuario entienda
+       por que algo pudo haber fallado o por que ve datos guardados. -->
+  <div class="offline-banner" *ngIf="!network.online()">
+    Sin conexion a internet. Mostrando la ultima informacion guardada.
+  </div>
+
   <ion-router-outlet></ion-router-outlet>
 </ion-app>

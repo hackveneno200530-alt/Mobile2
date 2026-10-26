@@ -35,6 +35,59 @@ $transition: 1.25s;
   user-select: none;
 }
 
+// Barra para configurar a que servidor (IP:puerto) apuntan las APIs.
+// position:fixed para no interferir con el centrado flex de .main (ver
+// .login-content::part(scroll) mas abajo): siempre queda pegada arriba,
+// sin importar si se ve el formulario de Sign In o Sign Up.
+.server-config {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  // padding-top respeta el area segura (status bar/notch del dispositivo);
+  // sin esto la barra queda tapada detras del reloj/bateria en Android.
+  padding: calc(8px + env(safe-area-inset-top)) 14px 8px;
+  background-color: rgba(249, 249, 249, 0.9);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  font-size: 11px;
+
+  &__label {
+    color: $gray;
+    white-space: nowrap;
+  }
+
+  &__input {
+    flex: 1;
+    min-width: 0;
+    height: 28px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 14px;
+    font-size: 11px;
+    font-family: 'Montserrat', sans-serif;
+    background-color: $neu-1;
+    box-shadow: inset 1px 1px 3px $neu-2, inset -1px -1px 3px $white;
+    outline: none;
+  }
+
+  &__button {
+    height: 28px;
+    padding: 0 12px;
+    border: none;
+    border-radius: 14px;
+    font-size: 11px;
+    font-weight: 700;
+    color: $white;
+    background-color: $purple;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+}
+
 .main {
   position: relative;
   width: 1000px;
@@ -56,8 +109,22 @@ $transition: 1.25s;
   @media (max-width: 800px) {
     transform: scale(0.5);
   }
+
+  // Telefono: en vez de seguir encogiendo la tarjeta de escritorio con
+  // scale() (ilegible en una pantalla real), se reacomoda a una sola
+  // columna que ocupa toda la pantalla. Ver overrides de .container,
+  // .form, .switch, etc. mas abajo, dentro del mismo breakpoint.
   @media (max-width: 600px) {
-    transform: scale(0.4);
+    transform: none;
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    min-height: 100%;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
   }
 }
 
@@ -140,6 +207,40 @@ $transition: 1.25s;
     font-size: 12px;
     margin-top: 12px;
     text-align: center;
+  }
+}
+
+// Mensaje dinamico debajo del password: resultado, payload, red, cabeceras
+// e IP de destino de la ultima llamada a la API (login o registro).
+.api-diagnostics {
+  width: 350px;
+  max-width: 100%;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background-color: $neu-1;
+  box-shadow: inset 1px 1px 3px $neu-2, inset -1px -1px 3px $white;
+  font-size: 10px;
+  line-height: 1.5;
+  max-height: 140px;
+  overflow-y: auto;
+
+  &__status {
+    font-weight: 700;
+    margin-bottom: 6px;
+
+    &--ok {
+      color: #2e9e52;
+    }
+
+    &--error {
+      color: $red;
+    }
+  }
+
+  &__line {
+    word-break: break-word;
+    margin-bottom: 2px;
   }
 }
 
@@ -294,5 +395,134 @@ $transition: 1.25s;
   30%,
   50% {
     width: 500px;
+  }
+}
+
+// ---------------------------------------------------------------------
+// TELEFONO (<= 600px): layout de una sola columna.
+// a-container/b-container dejan de deslizarse lado a lado (no caben) y
+// se apilan exactamente uno sobre el otro, mostrando solo el activo via
+// opacity/visibility (mismo estado "toggled" que ya controla el flip en
+// escritorio, sin tocar el componente ni el HTML). El panel decorativo
+// .switch deja de ser un panel lateral de 400px y se vuelve una barra
+// angosta al pie de pantalla con el boton para cambiar de formulario.
+// ---------------------------------------------------------------------
+@media (max-width: 600px) {
+  .container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: calc(100% - 96px); // deja espacio a la barra .switch de abajo
+    padding: 24px 20px;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 1;
+    transition: opacity 0.25s ease;
+  }
+
+  .a-container {
+    left: 0;
+    opacity: 1;
+    visibility: visible;
+    z-index: 2;
+
+    &.is-txl {
+      opacity: 0;
+      visibility: hidden;
+      z-index: 1;
+    }
+  }
+
+  .b-container {
+    left: 0;
+
+    &.is-txl.is-z200 {
+      opacity: 1;
+      visibility: visible;
+      z-index: 2;
+    }
+  }
+
+  .form {
+    &__icon {
+      width: 26px;
+    }
+
+    &__input {
+      width: 100%;
+      max-width: 320px;
+    }
+
+    &__span {
+      margin-top: 20px;
+      text-align: center;
+    }
+  }
+
+  .api-diagnostics {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .title {
+    font-size: 24px;
+    line-height: 2;
+  }
+
+  .button {
+    width: 100%;
+    max-width: 280px;
+    margin-top: 30px;
+  }
+
+  .switch {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: 96px;
+    padding: 12px 20px;
+    box-shadow: none;
+    z-index: 10;
+    // .container es position:absolute (fuera del flujo), asi que .switch
+    // es el unico hijo en el flujo normal de .main (flex-direction: column);
+    // margin-top:auto lo empuja al fondo de la pantalla.
+    margin-top: auto;
+
+    &__circle {
+      display: none; // decorativo, no cabe en una barra angosta
+    }
+
+    &__container {
+      position: static;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      flex-direction: row;
+      justify-content: center;
+      gap: 12px;
+
+      &.is-hidden {
+        // en escritorio is-hidden usa position:absolute para apilar los
+        // dos textos uno sobre otro; aqui ya no hay apilamiento, solo
+        // hay que quitarlo del flujo normal.
+        display: none;
+      }
+    }
+
+    &__title {
+      display: none; // sin espacio para el titulo grande, solo queda el boton
+    }
+
+    &__description {
+      display: none;
+    }
+
+    &__button {
+      margin-top: 0;
+      width: auto;
+      height: 40px;
+      padding: 0 24px;
+      font-size: 12px;
+    }
   }
 }

@@ -1,1 +1,21 @@
+.main-tab-bar {
+  --background: #ffffff;
+  --border: 1px solid #f1f2f6;
+  height: 56px;
 
+  ion-tab-button {
+    --color: #8395a7;
+    --color-selected: #1e272e;
+    position: relative;
+  }
+}
+
+.cart-badge {
+  position: absolute;
+  top: 4px;
+  right: calc(50% - 24px);
+  font-size: 0.65rem;
+  font-weight: 800;
+  border-radius: 10px;
+  padding: 2px 6px;
+}

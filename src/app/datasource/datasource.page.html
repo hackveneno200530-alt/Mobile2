@@ -1,0 +1,70 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Origenes de datos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Origenes de datos</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-list inset="true">
+    <ion-item>
+      <ion-label>Protocolo</ion-label>
+      <ion-badge slot="end" color="medium">{{ config.connectionConfig().protocol }}</ion-badge>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>IP / host</ion-label>
+      <ion-note slot="end">{{ config.connectionConfig().ip }}</ion-note>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Puerto</ion-label>
+      <ion-note slot="end">{{ config.connectionConfig().port }}</ion-note>
+    </ion-item>
+
+    <ion-item lines="none">
+      <ion-label>
+        <h3>URL completa en uso</h3>
+        <p>{{ config.fullUrl() }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <p class="ion-padding-horizontal hint">
+    Esta configuracion se guarda como JSON en el dispositivo (Preferences) y la
+    usan todas las pantallas que consumen la API (login, registro y catalogo).
+    Se edita desde el campo "Servidor" en la pantalla de login.
+  </p>
+
+  <ion-list inset="true">
+    <ion-item lines="none">
+      <ion-label>
+        <h2>Categorias (prueba de cache)</h2>
+        <p>Apaga el internet del dispositivo y presiona actualizar para ver la copia guardada.</p>
+      </ion-label>
+      <ion-button slot="end" fill="clear" (click)="loadCategories()" [disabled]="loadingCategories()">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-item>
+
+    <ion-item *ngIf="fromCache()" color="warning" lines="none">
+      <ion-label>
+        Sin conexion: mostrando copia guardada el {{ cachedAt() | date: 'short' }}
+      </ion-label>
+    </ion-item>
+
+    <ion-item *ngIf="categoriesError()" color="danger" lines="none">
+      <ion-label>{{ categoriesError() }}</ion-label>
+    </ion-item>
+
+    <ion-item *ngFor="let cat of categories()">
+      <ion-label>{{ cat.name }}</ion-label>
+      <ion-note slot="end">{{ cat.slug }}</ion-note>
+    </ion-item>
+  </ion-list>
+</ion-content>

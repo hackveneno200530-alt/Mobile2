@@ -1,31 +1,199 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Explorar
-    </ion-title>
+<ion-header [translucent]="true" class="store-header">
+  <ion-toolbar class="main-toolbar">
+    <div class="brand-container" slot="start">
+      <div class="brand-logo-circle">
+        <ion-icon name="bag-handle-outline"></ion-icon>
+      </div>
+      <div class="brand-titles">
+        <span class="store-sub">Oficial</span>
+        <h1 class="store-title">Del Río Caps</h1>
+      </div>
+    </div>
+
+    <ion-buttons slot="end">
+      @if (auth.currentUser(); as user) {
+        <div class="user-chip">
+          <ion-icon name="person-circle-outline"></ion-icon>
+          <span class="user-name">{{ user.first_name }}</span>
+        </div>
+        <ion-button (click)="logout()" title="Cerrar sesión" class="icon-action-btn">
+          <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+        </ion-button>
+      } @else {
+        <ion-button (click)="goToLogin()" class="login-action-btn" fill="solid" size="small">
+          Acceder
+        </ion-button>
+      }
+    </ion-buttons>
   </ion-toolbar>
+
+  <!-- Buscador con debounce -->
+  <ion-toolbar class="search-toolbar">
+    <ion-searchbar
+      [debounce]="300"
+      [value]="searchQuery()"
+      (ionInput)="onSearchChange($event)"
+      placeholder="Buscar gorras, ropa, sneakers o perfumes..."
+      class="custom-searchbar"
+      show-clear-button="focus"
+    ></ion-searchbar>
+  </ion-toolbar>
+
+  <!-- Carrusel Horizontal de Categorías -->
+  <div class="categories-bar">
+    <ion-chip
+      [class.active-chip]="selectedCategoryId() === null"
+      (click)="selectCategory(null)"
+      class="cat-chip"
+    >
+      <ion-icon name="sparkles-outline"></ion-icon>
+      <ion-label>Todos</ion-label>
+    </ion-chip>
+
+    @for (cat of categories(); track cat.id) {
+      <ion-chip
+        [class.active-chip]="selectedCategoryId() === cat.id"
+        (click)="selectCategory(cat.id)"
+        class="cat-chip"
+      >
+        <ion-label>{{ cat.name }}</ion-label>
+      </ion-chip>
+    }
+  </div>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Explorar</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="catalog-content">
+  <!-- Pull to Refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content
+      pullingIcon="arrow-down-outline"
+      pullingText="Desliza para actualizar catálogo"
+      refreshingSpinner="crescent"
+      refreshingText="Sincronizando con Del Río Caps..."
+    ></ion-refresher-content>
+  </ion-refresher>
 
-  <ion-list>
-    @for (product of mockProducts; track product.productId) {
-      <ion-item>
-        <ion-label>
-          <h2>{{ product.name }}</h2>
-          <p>{{ product.category }}</p>
-        </ion-label>
-        <ion-note slot="end">${{ product.price }}</ion-note>
-        <ion-button slot="end" fill="outline" (click)="addToCart(product)">
-          <ion-icon slot="start" name="cart-outline"></ion-icon>
-          Agregar
-        </ion-button>
-      </ion-item>
+  <!-- Barra de Filtros Rápidos -->
+  <div class="filters-panel ion-padding-horizontal">
+    <div class="sort-actions">
+      <button
+        type="button"
+        class="sort-btn"
+        [class.active]="sortOrder() === 'price_asc'"
+        (click)="toggleSort('price_asc')"
+      >
+        <ion-icon name="arrow-up-outline"></ion-icon>
+        <span>Menor Precio</span>
+      </button>
+
+      <button
+        type="button"
+        class="sort-btn"
+        [class.active]="sortOrder() === 'price_desc'"
+        (click)="toggleSort('price_desc')"
+      >
+        <ion-icon name="arrow-down-outline"></ion-icon>
+        <span>Mayor Precio</span>
+      </button>
+    </div>
+
+    <div class="stock-toggle-box">
+      <ion-label class="toggle-label">En Stock</ion-label>
+      <ion-toggle
+        [checked]="onlyInStock()"
+        (ionChange)="onStockToggle($event)"
+        class="stock-toggle"
+        color="dark"
+      ></ion-toggle>
+    </div>
+  </div>
+
+  <!-- Skeletons durante carga inicial -->
+  @if (loading()) {
+    <ion-grid class="products-grid ion-padding-horizontal">
+      <ion-row>
+        @for (i of [1, 2, 3, 4]; track i) {
+          <ion-col size="6" size-md="4" size-lg="3">
+            <div class="skeleton-card">
+              <ion-skeleton-text [animated]="true" class="skeleton-image"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" style="width: 40%; height: 12px; margin-top: 10px;"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" style="width: 85%; height: 16px; margin-top: 6px;"></ion-skeleton-text>
+              <ion-skeleton-text [animated]="true" style="width: 50%; height: 20px; margin-top: 8px;"></ion-skeleton-text>
+            </div>
+          </ion-col>
+        }
+      </ion-row>
+    </ion-grid>
+  } @else {
+    <!-- Empty State si no hay coincidencias -->
+    @if (filteredProducts().length === 0) {
+      <div class="empty-state ion-padding">
+        <div class="empty-icon-circle">
+          <ion-icon name="search-outline"></ion-icon>
+        </div>
+        <h3 class="empty-title">Sin resultados</h3>
+        <p class="empty-desc">
+          No encontramos artículos que coincidan con tus filtros actuales.
+        </p>
+        <button type="button" class="clear-filters-btn" (click)="clearFilters()">
+          Limpiar Filtros
+        </button>
+      </div>
+    } @else {
+      <!-- Grid de Productos -->
+      <ion-grid class="products-grid ion-padding-horizontal">
+        <ion-row>
+          @for (product of filteredProducts(); track product.id) {
+            <ion-col size="6" size-md="4" size-lg="3">
+              <div class="product-card" (click)="openProductDetail(product)">
+                <div class="card-image-box">
+                  <img
+                    [src]="product.image_url || 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500'"
+                    [alt]="product.name"
+                    class="card-img"
+                    loading="lazy"
+                  />
+                  <ion-badge
+                    class="badge-stock"
+                    [color]="(product.total_stock ?? 1) <= 0 ? 'danger' : (product.total_stock ?? 1) <= 3 ? 'warning' : 'dark'"
+                  >
+                    @if ((product.total_stock ?? 1) <= 0) {
+                      Agotado
+                    } @else if ((product.total_stock ?? 1) <= 3) {
+                      Últimas piezas
+                    } @else {
+                      Disponible
+                    }
+                  </ion-badge>
+                </div>
+
+                <div class="card-body">
+                  <span class="card-category">{{ product.category_name || product.brand || 'Colección' }}</span>
+                  <h4 class="card-title">{{ product.name }}</h4>
+
+                  <div class="card-footer-row">
+                    <div class="price-box">
+                      <span class="price-prefix">Desde</span>
+                      <span class="price-number">{{ product.base_price | currency: 'MXN': 'symbol': '1.0-0' }}</span>
+                    </div>
+
+                    <button type="button" class="quick-add-btn" title="Seleccionar opciones">
+                      <ion-icon name="cart-outline"></ion-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </ion-col>
+          }
+        </ion-row>
+      </ion-grid>
     }
-  </ion-list>
+  }
+
+  <!-- Modal Bottom Sheet de Detalle y Variantes -->
+  <app-product-detail-modal
+    [product]="selectedProduct()"
+    [isOpen]="isModalOpen()"
+    (modalClosed)="closeProductDetail()"
+  ></app-product-detail-modal>
 </ion-content>

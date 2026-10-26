@@ -3,10 +3,12 @@
  * Lectura y ajuste de inventario. No expone create/delete: la fila nace
  * junto con la variante (variants.php) y se elimina en cascada con ella.
  *
- * GET /catalog/inventory.php?variant_id=1  -> consulta stock
- * PUT /catalog/inventory.php?variant_id=1  -> { quantity } ajusta cantidad
+ * GET /catalog/inventory.php?variant_id=1  -> consulta stock              (Consulta)
+ * PUT /catalog/inventory.php?variant_id=1  -> { quantity } ajusta cantidad (Modificacion)
  *
  * Respuesta: { success, message, data }
+ *
+ * Este archivo es lo que InventoryService (Angular) consume.
  */
 
 require __DIR__ . '/../config.php';

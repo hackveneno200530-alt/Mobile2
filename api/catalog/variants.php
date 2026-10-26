@@ -1,14 +1,16 @@
 <?php
 /**
  * CRUD de variantes de producto (talla/color/ml).
- * GET    /catalog/variants.php                  -> lista todas
- * GET    /catalog/variants.php?product_id=1      -> lista por producto
- * GET    /catalog/variants.php?id=1              -> una variante
- * POST   /catalog/variants.php                   -> crea variante + inventario en 0
- * PUT    /catalog/variants.php?id=1              -> actualiza campos enviados
- * DELETE /catalog/variants.php?id=1              -> elimina (inventario cae en cascada)
+ * GET    /catalog/variants.php                  -> lista todas          (Consulta)
+ * GET    /catalog/variants.php?product_id=1      -> lista por producto  (Consulta)
+ * GET    /catalog/variants.php?id=1              -> una variante        (Consulta)
+ * POST   /catalog/variants.php                   -> crea variante + inventario en 0 (Alta)
+ * PUT    /catalog/variants.php?id=1              -> actualiza campos    (Modificacion)
+ * DELETE /catalog/variants.php?id=1              -> elimina (inventario cae en cascada) (Eliminacion)
  *
  * Respuesta: { success, message, data }
+ *
+ * Este archivo es lo que ProductVariantService (Angular) consume.
  */
 
 require __DIR__ . '/../config.php';
@@ -20,9 +22,14 @@ $productId = isset($_GET['product_id']) ? (int) $_GET['product_id'] : null;
 try {
     $pdo = getCatalogConnection();
 
+    // ---------- CONSULTA ----------
     if ($method === 'GET') {
+        $baseSql = 'SELECT pv.*, COALESCE(i.quantity, 0) AS stock, COALESCE(i.reserved, 0) AS reserved
+                    FROM product_variants pv
+                    LEFT JOIN inventory i ON pv.id = i.variant_id';
+
         if ($id !== null) {
-            $stmt = $pdo->prepare('SELECT * FROM product_variants WHERE id = :id');
+            $stmt = $pdo->prepare($baseSql . ' WHERE pv.id = :id');
             $stmt->execute(['id' => $id]);
             $row = $stmt->fetch();
             if (!$row) {
@@ -32,15 +39,16 @@ try {
         }
 
         if ($productId !== null) {
-            $stmt = $pdo->prepare('SELECT * FROM product_variants WHERE product_id = :pid ORDER BY id');
+            $stmt = $pdo->prepare($baseSql . ' WHERE pv.product_id = :pid ORDER BY pv.id');
             $stmt->execute(['pid' => $productId]);
             respondData(true, 'OK', $stmt->fetchAll());
         }
 
-        $stmt = $pdo->query('SELECT * FROM product_variants ORDER BY id');
+        $stmt = $pdo->query($baseSql . ' ORDER BY pv.id');
         respondData(true, 'OK', $stmt->fetchAll());
     }
 
+    // ---------- ALTA ----------
     if ($method === 'POST') {
         $body = readJsonBody();
         $productIdIn = (int) ($body['product_id'] ?? 0);
@@ -58,6 +66,9 @@ try {
             respondData(false, 'price debe ser un numero >= 0.', null, 422);
         }
 
+        // Transaccion: insertar la variante y su inventario deben pasar
+        // los dos juntos o ninguno (si el inventario fallara, no queremos
+        // una variante huerfana sin fila de stock).
         $pdo->beginTransaction();
         try {
             $stmt = $pdo->prepare(
@@ -82,7 +93,7 @@ try {
 
             $pdo->commit();
         } catch (PDOException $e) {
-            $pdo->rollBack();
+            $pdo->rollBack(); // deshace la variante si el inventario fallo
             throw $e;
         }
 
@@ -91,6 +102,7 @@ try {
         respondData(true, 'Variante creada.', $created->fetch(), 201);
     }
 
+    // ---------- MODIFICACION ----------
     if ($method === 'PUT') {
         if ($id === null) {
             respondData(false, 'Falta el parametro id.', null, 422);
@@ -123,10 +135,13 @@ try {
         respondData(true, 'Variante actualizada.', $row);
     }
 
+    // ---------- ELIMINACION ----------
     if ($method === 'DELETE') {
         if ($id === null) {
             respondData(false, 'Falta el parametro id.', null, 422);
         }
+        // FK ON DELETE CASCADE en la tabla inventory: al borrar la
+        // variante, MySQL borra sola la fila de inventario asociada.
         $stmt = $pdo->prepare('DELETE FROM product_variants WHERE id = :id');
         $stmt->execute(['id' => $id]);
         if ($stmt->rowCount() === 0) {

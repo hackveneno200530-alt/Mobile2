@@ -1,37 +1,115 @@
-import { Component, computed, inject } from '@angular/core';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonButton, IonIcon, IonNote } from '@ionic/angular';
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import {
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonList,
+  IonItem,
+  IonItemSliding,
+  IonItemOptions,
+  IonItemOption,
+  IonLabel,
+  IonButton,
+  IonIcon,
+  IonBadge,
+  IonButtons,
+} from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { addCircleOutline, removeCircleOutline, trashOutline } from 'ionicons/icons';
+import {
+  addOutline,
+  removeOutline,
+  trashOutline,
+  bagCheckOutline,
+  bagHandleOutline,
+  alertCircleOutline,
+  arrowForwardOutline,
+  chevronForwardOutline,
+  sparklesOutline,
+} from 'ionicons/icons';
 import { LocalCartService } from '../services/local-cart.service';
+import { NetworkStatusService } from '../services/network-status.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-tab3',
   standalone: true,
   templateUrl: 'tab3.page.html',
   styleUrls: ['tab3.page.scss'],
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonButton, IonIcon, IonNote],
+  imports: [
+    CommonModule,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
+    IonList,
+    IonItem,
+    IonItemSliding,
+    IonItemOptions,
+    IonItemOption,
+    IonButton,
+    IonIcon,
+    IonBadge,
+    IonButtons,
+  ],
 })
 export class Tab3Page {
   public cart = inject(LocalCartService);
-
-  public total = computed(() => this.cart.items().reduce((sum, item) => sum + item.price * item.quantity, 0));
+  public network = inject(NetworkStatusService);
+  public auth = inject(AuthService);
+  private router = inject(Router);
 
   constructor() {
-    addIcons({ addCircleOutline, removeCircleOutline, trashOutline });
+    addIcons({
+      addOutline,
+      removeOutline,
+      trashOutline,
+      bagCheckOutline,
+      bagHandleOutline,
+      alertCircleOutline,
+      arrowForwardOutline,
+      chevronForwardOutline,
+      sparklesOutline,
+    });
   }
 
-  increment(productId: number, currentQuantity: number): void {
-    void this.cart.updateQuantity(productId, currentQuantity + 1);
-  }
-
-  decrement(productId: number, currentQuantity: number): void {
-    if (currentQuantity <= 1) {
-      return; // usa el boton de eliminar para quitarlo del carrito
+  increment(variantId: number, currentQty: number, maxStock: number): void {
+    if (currentQty < maxStock) {
+      void this.cart.updateQuantity(variantId, currentQty + 1);
     }
-    void this.cart.updateQuantity(productId, currentQuantity - 1);
   }
 
-  remove(productId: number): void {
-    void this.cart.removeItem(productId);
+  decrement(variantId: number, currentQty: number): void {
+    if (currentQty > 1) {
+      void this.cart.updateQuantity(variantId, currentQty - 1);
+    }
+  }
+
+  remove(variantId: number): void {
+    void this.cart.removeItem(variantId);
+  }
+
+  clear(): void {
+    void this.cart.clearCart();
+  }
+
+  goToExplore(): void {
+    this.router.navigateByUrl('/tabs/tab1');
+  }
+
+  proceedToCheckout(): void {
+    if (!this.network.online()) {
+      return;
+    }
+
+    if (!this.auth.currentUser()) {
+      // Redirigir al login si no ha iniciado sesión, conservando el carrito en Preferences
+      this.router.navigateByUrl('/login');
+      return;
+    }
+
+    this.router.navigateByUrl('/checkout');
   }
 }

@@ -1,48 +1,164 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Carrito
+  <ion-toolbar class="cart-toolbar">
+    <ion-title class="cart-title">
+      Mi Carrito
+      @if (cart.totalCount() > 0) {
+        <ion-badge color="dark" class="header-badge">{{ cart.totalCount() }} pzs</ion-badge>
+      }
     </ion-title>
+
+    <ion-buttons slot="end">
+      @if (cart.items().length > 0) {
+        <ion-button fill="clear" color="medium" (click)="clear()" class="clear-btn">
+          Vaciar
+        </ion-button>
+      }
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Carrito</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
+<ion-content [fullscreen]="true" class="cart-content">
   @if (cart.items().length === 0) {
-    <p class="empty-cart">Tu carrito esta vacio.</p>
+    <!-- Empty State -->
+    <div class="empty-cart-state ion-padding">
+      <div class="empty-cart-circle">
+        <ion-icon name="bag-handle-outline"></ion-icon>
+      </div>
+      <h3 class="empty-title">Tu carrito está vacío</h3>
+      <p class="empty-desc">
+        Aún no has agregado artículos de nuestra colección. Explora nuestras gorras, streetwear y perfumes exclusivos.
+      </p>
+      <button type="button" class="explore-btn" (click)="goToExplore()">
+        Explorar Catálogo
+      </button>
+    </div>
   } @else {
-    <ion-list>
-      @for (item of cart.items(); track item.productId) {
-        <ion-item>
-          <ion-label>
-            <h2>{{ item.name }}</h2>
-            <p>${{ item.price }} c/u</p>
-          </ion-label>
+    <!-- Lista de Artículos -->
+    <div class="cart-list-wrapper ion-padding-top">
+      <p class="swipe-hint">
+        <span>Desliza un artículo hacia la izquierda para eliminarlo</span>
+      </p>
 
-          <ion-button slot="end" fill="clear" (click)="decrement(item.productId, item.quantity)">
-            <ion-icon slot="icon-only" name="remove-circle-outline"></ion-icon>
-          </ion-button>
+      <ion-list lines="none" class="cart-list">
+        @for (item of cart.items(); track item.variantId) {
+          <ion-item-sliding class="cart-sliding-item">
+            <ion-item class="cart-item-card">
+              <!-- Imagen del Producto -->
+              <div class="item-thumb-box" slot="start">
+                <img
+                  [src]="item.imageUrl || 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=200'"
+                  [alt]="item.name"
+                  class="item-thumb"
+                />
+              </div>
 
-          <ion-note slot="end">{{ item.quantity }}</ion-note>
+              <!-- Información de la Variante -->
+              <div class="item-info">
+                <h4 class="item-name">{{ item.name }}</h4>
 
-          <ion-button slot="end" fill="clear" (click)="increment(item.productId, item.quantity)">
-            <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
-          </ion-button>
+                <div class="item-variants-tags">
+                  @if (item.size) {
+                    <span class="v-tag">Talla: {{ item.size }}</span>
+                  }
+                  @if (item.volume_ml) {
+                    <span class="v-tag">{{ item.volume_ml }} ml</span>
+                  }
+                  @if (item.color) {
+                    <span class="v-tag">{{ item.color }}</span>
+                  }
+                </div>
 
-          <ion-button slot="end" fill="clear" color="danger" (click)="remove(item.productId)">
-            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
-          </ion-button>
-        </ion-item>
+                <div class="item-price-row">
+                  <span class="item-unit-price">{{ item.price | currency: 'MXN': 'symbol': '1.0-0' }} c/u</span>
+                  <span class="item-subtotal-price">{{ (item.price * item.quantity) | currency: 'MXN': 'symbol': '1.0-0' }}</span>
+                </div>
+              </div>
+
+              <!-- Controles Stepper -->
+              <div class="stepper-box" slot="end">
+                <button
+                  type="button"
+                  class="stepper-btn"
+                  (click)="decrement(item.variantId, item.quantity)"
+                  [disabled]="item.quantity <= 1"
+                >
+                  <ion-icon name="remove-outline"></ion-icon>
+                </button>
+                <span class="stepper-val">{{ item.quantity }}</span>
+                <button
+                  type="button"
+                  class="stepper-btn"
+                  (click)="increment(item.variantId, item.quantity, item.maxStock)"
+                  [disabled]="item.quantity >= item.maxStock"
+                >
+                  <ion-icon name="add-outline"></ion-icon>
+                </button>
+              </div>
+            </ion-item>
+
+            <!-- Opción deslizable para borrar -->
+            <ion-item-options side="end">
+              <ion-item-option color="danger" (click)="remove(item.variantId)">
+                <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+              </ion-item-option>
+            </ion-item-options>
+          </ion-item-sliding>
+        }
+      </ion-list>
+    </div>
+
+    <!-- Resumen Financiero -->
+    <div class="summary-card ion-margin">
+      <h4 class="summary-title">Resumen del Pedido</h4>
+
+      <div class="summary-row">
+        <span class="row-label">Subtotal</span>
+        <span class="row-val">{{ cart.subtotal() | currency: 'MXN': 'symbol': '1.0-0' }}</span>
+      </div>
+
+      <div class="summary-row">
+        <span class="row-label">Envío estimado</span>
+        <span class="row-val" [class.free-shipping]="cart.shippingCost() === 0">
+          {{ cart.shippingCost() === 0 ? '¡GRATIS!' : (cart.shippingCost() | currency: 'MXN': 'symbol': '1.0-0') }}
+        </span>
+      </div>
+
+      @if (cart.subtotal() < 999 && cart.subtotal() > 0) {
+        <div class="shipping-progress-box">
+          <ion-icon name="sparkles-outline"></ion-icon>
+          <span>Agrega {{ (999 - cart.subtotal()) | currency: 'MXN': 'symbol': '1.0-0' }} más para obtener <strong>Envío Gratis</strong></span>
+        </div>
       }
-    </ion-list>
 
-    <div class="cart-total">
-      <strong>Total: ${{ total() }}</strong>
+      <div class="summary-divider"></div>
+
+      <div class="summary-row total-row">
+        <span class="total-label">Total a Pagar</span>
+        <span class="total-val">{{ cart.total() | currency: 'MXN': 'symbol': '1.0-0' }}</span>
+      </div>
+    </div>
+
+    <!-- Botón Principal de Checkout -->
+    <div class="checkout-action-box ion-padding">
+      @if (!network.online()) {
+        <div class="offline-warning-box">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          <span>Conéctate a internet para confirmar tu pedido</span>
+        </div>
+        <button type="button" class="checkout-btn disabled" disabled>
+          Proceder al Checkout
+        </button>
+      } @else {
+        <button type="button" class="checkout-btn" (click)="proceedToCheckout()">
+          <span class="btn-text">
+            {{ auth.currentUser() ? 'Proceder al Checkout' : 'Iniciar Sesión para Pagar' }}
+          </span>
+          <div class="btn-right">
+            <span class="btn-total">{{ cart.total() | currency: 'MXN': 'symbol': '1.0-0' }}</span>
+            <ion-icon name="arrow-forward-outline"></ion-icon>
+          </div>
+        </button>
+      }
     </div>
   }
 </ion-content>
