@@ -6,6 +6,8 @@ import {
   CheckoutResult,
   Order,
   CacheResult,
+  Coupon,
+  CouponValidationResult,
 } from '../models/catalog.models';
 import { CacheService } from './cache.service';
 
@@ -70,6 +72,28 @@ export class OrderService {
       }
       return { data: [], fromCache: true, cachedAt: new Date().toISOString() };
     }
+  }
+
+  /**
+   * Consulta los cupones y promociones vigentes de la tienda.
+   */
+  async listActiveCoupons(): Promise<Coupon[]> {
+    const { data } = await apiClient.get<ApiResponse<Coupon[]>>('/orders/coupon.php');
+    return data.data ?? [];
+  }
+
+  /**
+   * Valida un cupón de descuento promocional contra la API PHP y calcula el total.
+   */
+  async validateCoupon(couponCode: string, subtotal: number): Promise<CouponValidationResult> {
+    const { data } = await apiClient.post<ApiResponse<CouponValidationResult>>(
+      '/orders/coupon.php',
+      { coupon_code: couponCode, subtotal }
+    );
+    if (!data.success || !data.data) {
+      throw new Error(data.message || 'Cupón inválido o expirado.');
+    }
+    return data.data;
   }
 
   private async refreshCacheInBackground(userId: number, cacheKey: string): Promise<void> {

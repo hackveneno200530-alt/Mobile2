@@ -139,3 +139,24 @@ export interface CheckoutResult {
   status: OrderStatus;
   created_at: string;
 }
+
+export interface Coupon {
+  id: number;
+  code: string;
+  description: string;
+  discount_percent: number;
+  min_purchase: number;
+  expires_at?: string;
+}
+
+export interface CouponValidationResult {
+  coupon_id: number;
+  coupon_code: string;
+  description: string;
+  discount_percent: number;
+  original_subtotal: number;
+  discount_amount: number;
+  final_total: number;
+  expires_at?: string;
+}
+
